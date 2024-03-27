@@ -1,0 +1,4 @@
+name: Sleep
+version: '${version}'
+main: com.github.sheauoian.sleep.Sleep
+api-version: '1.20'
