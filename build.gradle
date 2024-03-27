@@ -1,5 +1,6 @@
 plugins {
-    id 'java'
+    id("java")
+    id("xyz.jpenilla.run-paper") version "2.2.3"
 }
 
 group = 'com.github.sheauoian'
@@ -12,13 +13,27 @@ repositories {
         url = "https://repo.papermc.io/repository/maven-public/"
     }
     maven {
+        name = "CodeMC"
+        url = uri("https://repo.codemc.io/repository/maven-public/")
+    }
+    maven {
         name = "sonatype"
         url = "https://oss.sonatype.org/content/groups/public/"
+    }
+    maven {
+        url "https://repo.dmulloy2.net/repository/public/"
     }
 }
 
 dependencies {
-    compileOnly "io.papermc.paper:paper-api:1.20.4-R0.1-SNAPSHOT"
+    // PaperMC
+    compileOnly group: "io.papermc.paper", name: "paper-api", version: "1.20.4-R0.1-SNAPSHOT"
+    // NBT API
+    compileOnly("de.tr7zw:item-nbt-api-plugin:2.12.2")
+    // Protocol Lib
+    compileOnly("com.comphenix.protocol:ProtocolLib:5.1.0")
+    // SQLite
+    implementation("org.xerial:sqlite-jdbc:3.45.2.0")
 }
 
 def targetJavaVersion = 17
@@ -36,6 +51,12 @@ tasks.withType(JavaCompile).configureEach {
 
     if (targetJavaVersion >= 10 || JavaVersion.current().isJava10Compatible()) {
         options.release.set(targetJavaVersion)
+    }
+}
+
+tasks {
+    runServer {
+        minecraftVersion("1.20.4")
     }
 }
 
