@@ -32,9 +32,9 @@ repositories {
 
 dependencies {
     // PaperMC
-    compileOnly group: "io.papermc.paper", name: "paper-api", version: "1.20.4-R0.1-SNAPSHOT"
+    compileOnly("io.papermc.paper:paper-api:1.20.4-R0.1-SNAPSHOT")
     // NBT API
-    compileOnly("de.tr7zw:item-nbt-api-plugin:2.12.2")
+    compileOnly("de.tr7zw:item-nbt-api-plugin:2.12.3")
     // Protocol Lib
     compileOnly("com.comphenix.protocol:ProtocolLib:5.1.0")
     // Mythic API
@@ -52,7 +52,6 @@ java {
         toolchain.languageVersion = JavaLanguageVersion.of(targetJavaVersion)
     }
 }
-
 tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
 
@@ -60,13 +59,11 @@ tasks.withType(JavaCompile).configureEach {
         options.release.set(targetJavaVersion)
     }
 }
-
 tasks {
     runServer {
         minecraftVersion("1.20.4")
     }
 }
-
 processResources {
     def props = [version: version]
     inputs.properties props

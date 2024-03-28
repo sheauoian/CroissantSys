@@ -2,10 +2,7 @@ package com.github.sheauoian.sleep.item;
 
 import com.github.sheauoian.sleep.Sleep;
 import de.tr7zw.nbtapi.NBTItem;
-import de.tr7zw.nbtapi.plugin.NBTAPI;
-import net.kyori.adventure.text.TextComponent;
 import org.bukkit.Material;
-import org.bukkit.entity.Item;
 import org.bukkit.inventory.ItemStack;
 
 public class SleepItem {
@@ -21,11 +18,17 @@ public class SleepItem {
         this.category = category;
     }
     public ItemStack getItemStack() {
-        ItemStack item = new ItemStack(this.material);
+        ItemStack item = new ItemStack(Material.PAPER);
         NBTItem nbtItem = new NBTItem(item);
         nbtItem.setString("sleep_item", this.item_id);
         return nbtItem.getItem();
     }
+
+    @Override
+    public String toString() {
+        return "SleepItem;" + this.item_id;
+    }
+
     public void save() {
         Sleep.sleepItemDAO.insert(item_id, item_name, material.toString(), category);
     }

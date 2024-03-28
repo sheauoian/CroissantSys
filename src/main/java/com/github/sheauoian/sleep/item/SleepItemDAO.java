@@ -4,6 +4,8 @@ package com.github.sheauoian.sleep.item;
 import org.bukkit.Bukkit;
 
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class SleepItemDAO {
     private Connection connection = null;
@@ -34,20 +36,23 @@ public class SleepItemDAO {
             Bukkit.getLogger().info("[SQL] テーブル 'item' は既に作成されています");
         }
     }
-    public void readAll(){
+    public List<SleepItem> getAll(){
         try {
             ResultSet rs = statement.executeQuery("SELECT * FROM item");
+            List<SleepItem> ret = new ArrayList<>();
             while (rs.next()) {
                 String id = rs.getString("id");
                 String name = rs.getString("name");
                 String item_type = rs.getString("item_type");
                 int category = rs.getInt("category");
-                System.out.println(id + "," + name + ","+ item_type +","+ category);
+                ret.add(new SleepItem(id, name, item_type, category));
             }
             rs.close();
+            return ret;
         } catch (SQLException e){
             Bukkit.getLogger().info(e.getMessage());
         }
+        return null;
     }
 
     public SleepItem getByID(String id){

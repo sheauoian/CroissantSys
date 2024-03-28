@@ -48,12 +48,23 @@ public class SleepCMD extends CMD implements TabCompleter {
                 }
             }
             else if (args[0].equals(completeList[3])) {
-                sender.sendMessage("gett");
                 if (args.length >= 2) {
                     if (Sleep.sleepItemDAO.getByID(args[1]) != null) {
                         sender.sendMessage("存在するのさ");
                     } else {
                         sender.sendMessage("存在しないのさ");
+                    }
+                } else {
+                    List<SleepItem> sleepItems = Sleep.sleepItemDAO.getAll();
+                    if (sender instanceof Player p) {
+                        for(SleepItem i : sleepItems) {
+                            p.sendMessage(i.toString());
+                            p.getInventory().addItem(i.getItemStack());
+                        }
+                    } else {
+                        for(SleepItem i : sleepItems) {
+                            sender.sendMessage(i.toString());
+                        }
                     }
                 }
             }

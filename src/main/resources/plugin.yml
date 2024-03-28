@@ -3,7 +3,7 @@ version: '${version}'
 main: com.github.sheauoian.sleep.Sleep
 api-version: '1.20'
 
-depend: [ ProtocolLib ]
+depend: [ ProtocolLib, NBTAPI ]
 
 commands:
     sleep:
