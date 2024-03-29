@@ -17,7 +17,7 @@ import java.util.Arrays;
 import java.util.List;
 
 public class SleepCMD extends CMD implements TabCompleter {
-    private final String[] completeList = new String[] { "version", "help", "くたばってしまえ", "get" };
+    private final String[] completeList = new String[] { "version", "help", "くたばってしまえ", "get", "reset" };
     public SleepCMD(Sleep plugin) {
         super(plugin);
     }
@@ -42,7 +42,7 @@ public class SleepCMD extends CMD implements TabCompleter {
                 if (args.length >= 3) {
                     if (sender instanceof Player) {
                         Player p = (Player) sender;
-                        Material material = p.getItemOnCursor().getType();
+                        Material material = p.getInventory().getItemInMainHand().getType();
                         new SleepItem(args[1], args[2], material.toString(), 0).save();
                     }
                 }
@@ -67,6 +67,11 @@ public class SleepCMD extends CMD implements TabCompleter {
                         }
                     }
                 }
+            }
+            else if (args[0].equals(completeList[4])) {
+                Sleep.sleepItemDAO.dropTable();
+                Sleep.sleepItemDAO.createTable();
+                sender.sendMessage("たぶんりせっとできたとおもいます");
             }
         }
         return false;

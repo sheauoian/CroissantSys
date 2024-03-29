@@ -18,7 +18,7 @@ public class SleepItem {
         this.category = category;
     }
     public ItemStack getItemStack() {
-        ItemStack item = new ItemStack(Material.PAPER);
+        ItemStack item = new ItemStack(this.material);
         NBTItem nbtItem = new NBTItem(item);
         nbtItem.setString("sleep_item", this.item_id);
         return nbtItem.getItem();
