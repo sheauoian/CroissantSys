@@ -11,5 +11,3 @@ ProtocolLib
 NBTAPI
 MythicMobs
 ```
-
-がんばってつくってくださいね
