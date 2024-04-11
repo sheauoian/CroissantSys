@@ -1,25 +1,19 @@
 package com.github.sheauoian.sleep.dao.user;
 
 import com.github.sheauoian.sleep.dao.Dao;
-import com.github.sheauoian.sleep.item.SleepItem;
+import com.github.sheauoian.sleep.player.SleepPlayer;
 import com.github.sheauoian.sleep.player.UserInfo;
-import org.bukkit.Bukkit;
+import io.papermc.paper.annotation.DoNotUse;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 
-import java.sql.PreparedStatement;
 import java.time.LocalDateTime;
-import java.util.Date;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.UUID;
 
 public class UserInfoDao extends Dao {
     private final static UserInfoDao singleton = new UserInfoDao();
-    private final static SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
     @Override
     public void createTable(){
         try {
@@ -43,49 +37,71 @@ public class UserInfoDao extends Dao {
             logger.info(e.getMessage());
         }
     }
-    public UserInfo getOnline_ByUUID(UUID uuid) {
+
+
+    // For Newcomers.
+    public UserInfo insertAndGet(OfflinePlayer player) {
+        this.insert(player);
+        return get(player);
+    }
+    // Get an UserInfo Column.
+    public UserInfo get(OfflinePlayer player) {
         try {
-            ResultSet rs = statement.executeQuery("SELECT * FROM user WHERE uuid = '"+ uuid +"' LIMIT 1");
-            if (!rs.next()) {
-                this.insert_newUserInfo(uuid.toString());
-            }
-            Player player = Bukkit.getServer().getPlayer(uuid);
-            String first_login = rs.getString("first_login");
-            String last_login  = rs.getString("last_login");
-            int level = rs.getInt("level");
-            float xp = rs.getFloat("xp");
-            float strength = rs.getFloat("strength");
-            float defence = rs.getFloat("defence");
-            float health = rs.getFloat("health");
-            float max_health = rs.getFloat("max_health");
-            rs.close();
-            return new UserInfo(
-                    player,
-                    uuid.toString(),
-                    first_login,
-                    last_login,
-                    level,
-                    xp,
-                    strength,
-                    defence,
-                    health,
-                    max_health
+            ResultSet resultSet = statement.executeQuery(String.format(
+                    "select * from user where uuid = '%s' limit 1",
+                    player.getUniqueId()
+                    )
             );
-        } catch (SQLException e){
+            if (resultSet.next()) {
+                String first_login = resultSet.getString("first_login");
+                String last_login  = resultSet.getString("last_login");
+                int level = resultSet.getInt("level");
+                float xp = resultSet.getFloat("xp");
+                float strength = resultSet.getFloat("strength");
+                float defence = resultSet.getFloat("defence");
+                float health = resultSet.getFloat("health");
+                float max_health = resultSet.getFloat("max_health");
+                if (player instanceof Player)
+                    return new SleepPlayer(
+                        player.getUniqueId(),
+                        first_login,
+                        last_login,
+                        level,
+                        xp,
+                        strength,
+                        defence,
+                        health,
+                        max_health,
+                        (Player) player
+                );
+                return new UserInfo(
+                        player.getUniqueId(),
+                        first_login,
+                        last_login,
+                        level,
+                        xp,
+                        strength,
+                        defence,
+                        health,
+                        max_health
+                );
+            }
+        } catch (SQLException e) {
             logger.info(e.getMessage());
         }
         return null;
     }
-    public void insert_newUserInfo(String uuid) {
+    // Create new UserInfo Column if not exists.
+    public void insert(OfflinePlayer p) {
         try {
             String values = String.format(
                     "'%s','%s','%s'",
-                    uuid,
+                    p.getUniqueId(),
                     LocalDateTime.now(),
                     LocalDateTime.now()
             );
             String sql = String.format("""
-                        INSERT INTO user
+                        INSERT OR IGNORE INTO user
                         (
                             uuid,
                             first_login,
@@ -97,12 +113,14 @@ public class UserInfoDao extends Dao {
             logger.info(e.getMessage());
         }
     }
-
+    // Update an UserInfo Column.
     public void update(UserInfo info) {
         try {
             String sql = String.format("""
                         UPDATE user SET
                             last_login = '%s',
+                            level = %s,
+                            xp = %s,
                             strength = %s,
                             defence = %s,
                             health = %s,
@@ -110,16 +128,19 @@ public class UserInfoDao extends Dao {
                         WHERE uuid = '%s'
                         """,
                     LocalDateTime.now(),
+                    info.getLevel(),
+                    info.getXp(),
                     info.getStrength(),
                     info.getDefence(),
                     info.getHealth(),
                     info.getMaxHealth(),
-                    info.player.getUniqueId());
+                    info.uuid);
             statement.executeUpdate(sql);
         } catch (SQLException e) {
             logger.info(e.getMessage());
         }
     }
+
 
     public static UserInfoDao getInstance() {
         return singleton;

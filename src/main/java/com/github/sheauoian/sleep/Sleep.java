@@ -18,11 +18,14 @@ import java.util.logging.Logger;
 public final class Sleep extends JavaPlugin {
     public static Sleep instance;
     public static Logger logger;
+    public static UserManager userManager;
     @Override
     public void onEnable() {
         instance = this;
         logger = getLogger();
         PluginManager manager = Bukkit.getPluginManager();
+        userManager = new UserManager();
+
         // Database - Create Tables
         UserInfoDao.getInstance().createTable();
         SleepItemDao.getInstance().createTable();
@@ -42,7 +45,7 @@ public final class Sleep extends JavaPlugin {
     }
     @Override
     public void onDisable() {
-        UserManager.getInstance().close();
+        userManager.close();
         DbDriver.singleton().closeConnection();
         getLogger().info("good night ;)");
     }

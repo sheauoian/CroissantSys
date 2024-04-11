@@ -11,6 +11,5 @@ public abstract class Dao {
     protected final Connection connection = DbDriver.singleton().getConnection();
     protected final Statement statement = DbDriver.singleton().getStatement();
     protected final Logger logger = Sleep.logger;
-
     public abstract void createTable();
 }

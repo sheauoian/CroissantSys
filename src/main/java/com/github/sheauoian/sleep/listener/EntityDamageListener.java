@@ -1,5 +1,7 @@
 package com.github.sheauoian.sleep.listener;
 
+import com.github.sheauoian.sleep.Sleep;
+import com.github.sheauoian.sleep.player.SleepPlayer;
 import com.github.sheauoian.sleep.player.UserInfo;
 import com.github.sheauoian.sleep.player.UserManager;
 import io.lumine.mythic.api.adapters.AbstractEntity;
@@ -33,7 +35,7 @@ public class EntityDamageListener implements Listener {
                 return;
             }
             else if (attacker instanceof Player) {
-                UserInfo info = UserManager.getInstance().get((Player) attacker);
+                SleepPlayer info = Sleep.userManager.get((Player) attacker);
                 double damage = info.getStrength();
                 boolean isMythicMob = MythicBukkit.inst().getMobManager().isMythicMob(victim);
                 boolean isCritical = e_.isCritical();
@@ -56,7 +58,7 @@ public class EntityDamageListener implements Listener {
             }
         }
         if (victim instanceof Player) {
-            UserInfo info = UserManager.getInstance().get((Player) victim);
+            SleepPlayer info = Sleep.userManager.get((Player) victim);
             if (info.damage((float)e.getDamage())) {
                 e.setDamage(0);
             } else {
@@ -67,7 +69,7 @@ public class EntityDamageListener implements Listener {
 
     @EventHandler
     public void onRespawn(PlayerRespawnEvent e) {
-        UserManager.getInstance().get(e.getPlayer()).resetHealth();
+        Sleep.userManager.get(e.getPlayer()).resetHealth();
     }
 
     @EventHandler
@@ -83,7 +85,7 @@ public class EntityDamageListener implements Listener {
                         1.5f,
                         1.5f
                 );
-                UserManager.getInstance().get(p).addXp(100);
+                Sleep.userManager.get(p).getXp(100);
             }
         }
     }

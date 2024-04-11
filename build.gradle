@@ -1,6 +1,7 @@
 plugins {
     id("java")
     id("xyz.jpenilla.run-paper") version "2.2.3"
+    id("com.github.johnrengelman.shadow") version "8.1.1"
 }
 
 group = 'com.github.sheauoian'
@@ -35,6 +36,8 @@ dependencies {
     compileOnly("io.papermc.paper:paper-api:1.20.4-R0.1-SNAPSHOT")
     // NBT API
     compileOnly("de.tr7zw:item-nbt-api-plugin:2.12.3")
+    // FastBoard
+    implementation('fr.mrmicky:fastboard:2.1.0')
     // Protocol Lib
     compileOnly("com.comphenix.protocol:ProtocolLib:5.1.0")
     // Mythic API
@@ -42,6 +45,11 @@ dependencies {
     // SQLite
     implementation("org.xerial:sqlite-jdbc:3.45.2.0")
 }
+shadowJar {
+    relocate("fr.mrmicky.fastboard", "com.github.sheauoian.sleep.api.fastboard")
+}
+
+
 
 def targetJavaVersion = 17
 java {

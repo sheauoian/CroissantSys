@@ -40,7 +40,7 @@ public class SleepCMD extends CMD implements TabCompleter {
                 sender.sendMessage("/sleep help : ヘルプを表示します");
             } else if (args[0].equals(completeList[2])) {
                 if (sender instanceof Player p) {
-                    UserManager.getInstance().get(p).resetHealth();
+                    Sleep.userManager.get(p).resetHealth();
                     p.sendMessage("HPをリセットしました");
                 } else {
                     sender.sendMessage("このコマンドはプレイヤーのみぞつかうことができよう");

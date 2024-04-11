@@ -19,9 +19,10 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 public class ItemCMD extends CMD implements TabCompleter {
-    private final String[] completeList = new String[] { "list", "register", "rename", "get" };
+    private final String[] completeList = new String[] { "list", "register", "rename", "get", "drop", "info" };
     public ItemCMD(Sleep plugin) {
         super(plugin);
     }
@@ -47,9 +48,9 @@ public class ItemCMD extends CMD implements TabCompleter {
                 ) {
                     ItemStack item = p.getInventory().getItemInMainHand();
                     String displayName_json =
-                            JSONComponentSerializer.json().serialize( item.displayName()
-                                    .decoration(TextDecoration.ITALIC, false)
-                            );
+                            JSONComponentSerializer.json().serialize(Objects.requireNonNullElse(
+                                    item.getItemMeta().displayName(),
+                                    Component.text("Unnamed Item")));
                     p.sendMessage(displayName_json);
                     dao.insert(
                             args[1],
@@ -84,6 +85,9 @@ public class ItemCMD extends CMD implements TabCompleter {
                         p.getInventory().addItem(sleepItem.getItemStack());
                     }
                 }
+            } else if (args[0].equals(completeList[4])) {
+                dao.dropTable();
+                dao.createTable();
             }
         }
         return false;
