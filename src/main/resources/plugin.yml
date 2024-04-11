@@ -3,8 +3,12 @@ version: '${version}'
 main: com.github.sheauoian.sleep.Sleep
 api-version: '1.20'
 
-depend: [ ProtocolLib, NBTAPI ]
+depend: [ ProtocolLib, NBTAPI, MythicMobs ]
 
 commands:
     sleep:
         description: Sleep のメインコマンドです
+    item:
+        description: Sleep Item を統括します
+    user:
+        description: Sleep User を統括します

@@ -2,34 +2,46 @@ package com.github.sheauoian.sleep.item;
 
 import com.github.sheauoian.sleep.Sleep;
 import de.tr7zw.nbtapi.NBTItem;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.TextColor;
+import net.kyori.adventure.text.serializer.json.JSONComponentSerializer;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
+import net.kyori.adventure.util.HSVLike;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 
 public class SleepItem {
-    private String item_id;
-    private String item_name;
-    private Material material;
-    private int category;
+    private final String item_id;
+    private final Component item_name;
+    private final Material material;
+    private final int category;
 
     public SleepItem(String item_id, String item_name, String material_name, int category) {
+        this.item_id = item_id;
+        this.item_name = JSONComponentSerializer.json().deserialize(item_name);
+        this.material = Material.getMaterial(material_name);
+        this.category = category;
+    }
+    public SleepItem(String item_id, Component item_name, String material_name, int category) {
         this.item_id = item_id;
         this.item_name = item_name;
         this.material = Material.getMaterial(material_name);
         this.category = category;
     }
+
+
     public ItemStack getItemStack() {
         ItemStack item = new ItemStack(this.material);
+        ItemMeta meta = item.getItemMeta();
+        meta.displayName(this.item_name);
+        item.setItemMeta(meta);
         NBTItem nbtItem = new NBTItem(item);
         nbtItem.setString("sleep_item", this.item_id);
         return nbtItem.getItem();
     }
-
     @Override
     public String toString() {
-        return "SleepItem;" + this.item_id;
-    }
-
-    public void save() {
-        Sleep.sleepItemDAO.insert(item_id, item_name, material.toString(), category);
+        return "sleepitem:" + this.item_id;
     }
 }

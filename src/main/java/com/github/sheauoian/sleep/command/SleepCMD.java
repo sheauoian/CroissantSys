@@ -2,6 +2,8 @@ package com.github.sheauoian.sleep.command;
 
 import com.github.sheauoian.sleep.Sleep;
 import com.github.sheauoian.sleep.item.SleepItem;
+import com.github.sheauoian.sleep.player.UserInfo;
+import com.github.sheauoian.sleep.player.UserManager;
 import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -17,7 +19,7 @@ import java.util.Arrays;
 import java.util.List;
 
 public class SleepCMD extends CMD implements TabCompleter {
-    private final String[] completeList = new String[] { "version", "help", "くたばってしまえ", "get", "reset" };
+    private final String[] completeList = new String[] {"version", "help", "heal"};
     public SleepCMD(Sleep plugin) {
         super(plugin);
     }
@@ -36,42 +38,13 @@ public class SleepCMD extends CMD implements TabCompleter {
             else if (args[0].equals(completeList[1])) {
                 sender.sendMessage("/sleep version : バージョンを表示します");
                 sender.sendMessage("/sleep help : ヘルプを表示します");
-            }
-            else if (args[0].equals(completeList[2])) {
-                sender.sendMessage("くたばってしまいもうしわけありませんでしta");
-                if (args.length >= 3) {
-                    if (sender instanceof Player) {
-                        Player p = (Player) sender;
-                        Material material = p.getInventory().getItemInMainHand().getType();
-                        new SleepItem(args[1], args[2], material.toString(), 0).save();
-                    }
-                }
-            }
-            else if (args[0].equals(completeList[3])) {
-                if (args.length >= 2) {
-                    if (Sleep.sleepItemDAO.getByID(args[1]) != null) {
-                        sender.sendMessage("存在するのさ");
-                    } else {
-                        sender.sendMessage("存在しないのさ");
-                    }
+            } else if (args[0].equals(completeList[2])) {
+                if (sender instanceof Player p) {
+                    UserManager.getInstance().get(p).resetHealth();
+                    p.sendMessage("HPをリセットしました");
                 } else {
-                    List<SleepItem> sleepItems = Sleep.sleepItemDAO.getAll();
-                    if (sender instanceof Player p) {
-                        for(SleepItem i : sleepItems) {
-                            p.sendMessage(i.toString());
-                            p.getInventory().addItem(i.getItemStack());
-                        }
-                    } else {
-                        for(SleepItem i : sleepItems) {
-                            sender.sendMessage(i.toString());
-                        }
-                    }
+                    sender.sendMessage("このコマンドはプレイヤーのみぞつかうことができよう");
                 }
-            }
-            else if (args[0].equals(completeList[4])) {
-                Sleep.sleepItemDAO.dropTable();
-                Sleep.sleepItemDAO.createTable();
-                sender.sendMessage("たぶんりせっとできたとおもいます");
             }
         }
         return false;
