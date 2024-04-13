@@ -1,12 +1,10 @@
 package com.github.sheauoian.sleep.player;
 
-import com.github.sheauoian.sleep.Sleep;
 import com.github.sheauoian.sleep.dao.user.UserInfoDao;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class UserManager {
     private static final Map<OfflinePlayer, UserInfo> USERS = new HashMap<>();
@@ -24,13 +22,16 @@ public class UserManager {
         return USERS.values();
     }
 
-    public void remove(Player player) {
-        UserInfoDao.getInstance().update(USERS.get(player));
+    public void remove(OfflinePlayer player) {
+        UserInfo info = USERS.get(player);
+        if (info instanceof SleepPlayer sleepPlayer) sleepPlayer.save();
+        else UserInfoDao.getInstance().update(info);
         USERS.remove(player);
     }
     public void close() {
         for (UserInfo info : USERS.values()) {
-            UserInfoDao.getInstance().update(info);
+            if (info instanceof SleepPlayer sleepPlayer) sleepPlayer.save();
+            else UserInfoDao.getInstance().update(info);
         }
     }
 }

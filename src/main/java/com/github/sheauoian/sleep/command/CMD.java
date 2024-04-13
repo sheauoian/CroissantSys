@@ -16,17 +16,14 @@ public abstract class CMD implements CommandExecutor {
             throw new NullPointerException("CommandName is null");
         this.register();
     }
-
     final Sleep getPlugin() {
         return CMD.plugin;
     }
-
     final void setPlugin(Sleep instance) {
         if (instance == null)
             throw new IllegalArgumentException("CommandにSleepが正常に渡されませんでした");
         CMD.plugin = instance;
     }
-
     public void register() {
         PluginCommand c = this.getPlugin().getCommand(this.getCommandName());
         if (c != null) {

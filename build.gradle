@@ -24,10 +24,12 @@ repositories {
     maven {
         url "https://repo.dmulloy2.net/repository/public/"
     }
-    // Mythic API
     maven {
         name "Lumine Releases"
         url "https://mvn.lumine.io/repository/maven-public/"
+    }
+    maven {
+        url = "https://jitpack.io"
     }
 }
 
@@ -44,11 +46,15 @@ dependencies {
     compileOnly("io.lumine:Mythic-Dist:5.6.1")
     // SQLite
     implementation("org.xerial:sqlite-jdbc:3.45.2.0")
+    // Simple HologramAPI (Text Display)
+    implementation("com.github.MaximFiedler:HologramAPI:1.1.4")
+    // Decent Holograms
+    compileOnly("com.github.decentsoftware-eu:decentholograms:2.8.6")
+    //
+    implementation("com.github.hamza-cskn.obliviate-invs:core:4.3.0")
+    implementation("com.github.hamza-cskn.obliviate-invs:configurablegui:4.3.0")
+    implementation("com.github.hamza-cskn.obliviate-invs:pagination:4.3.0")
 }
-shadowJar {
-    relocate("fr.mrmicky.fastboard", "com.github.sheauoian.sleep.api.fastboard")
-}
-
 
 
 def targetJavaVersion = 17

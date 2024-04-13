@@ -40,6 +40,10 @@ public class SleepItem {
         nbtItem.setString("sleep_item", this.item_id);
         return nbtItem.getItem();
     }
+    public Component displayName() {
+        return this.item_name;
+    }
+
     @Override
     public String toString() {
         return "sleepitem:" + this.item_id;

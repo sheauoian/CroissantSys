@@ -11,7 +11,7 @@ public class SleepItemDao extends Dao {
     private static final SleepItemDao singleton = new SleepItemDao();
     public void createTable(){
         try {
-            this.statement.executeQuery(
+            this.statement.execute(
                             """
                                 CREATE TABLE IF NOT EXISTS item
                                 (
@@ -21,9 +21,8 @@ public class SleepItemDao extends Dao {
                                     category INT DEFAULT 0
                                 )
                                 """);
-            this.connection.commit();
         } catch (SQLException e) {
-            logger.info("[SQL] テーブル 'item' は既に作成されています");
+            logger.info(e.getMessage());
         }
     }
     public List<SleepItem> getAll(){
@@ -41,14 +40,20 @@ public class SleepItemDao extends Dao {
             rs.close();
             return ret;
         } catch (SQLException e){
-            logger.info(e.getMessage());
+            e.printStackTrace();
         }
         return null;
     }
 
     public SleepItem getByID(String id){
         try {
-            ResultSet rs = statement.executeQuery("SELECT * FROM item WHERE id = '"+ id +"'");
+            String sql =
+                    """
+                    SELECT * FROM item WHERE id = ?;
+                    """;
+            PreparedStatement st = connection.prepareStatement(sql);
+            st.setString(1, id);
+            ResultSet rs = st.executeQuery();
             if (rs.next()) {
                 String name = rs.getString("name");
                 String item_type = rs.getString("item_type");
@@ -57,40 +62,31 @@ public class SleepItemDao extends Dao {
                 return new SleepItem(id, name, item_type, category);
             }
         } catch (SQLException e){
-            logger.info(e.getMessage());
+            e.printStackTrace();
         }
         return null;
     }
 
     public void insert(String id, String name, String item_type, int category){
         try {
-            String values = String.format(
-                    "'%s', ?,'%s',%s",
-                    id,
-                    item_type,
-                    category
-            );
-            String sql = String.format(
-                    "INSERT INTO item (" +
-                            "id, " +
-                            "name, " +
-                            "item_type, " +
-                            "category" +
-                            ") " +
-                    "VALUES (%s);",
-                    values);
-            PreparedStatement preparedStatement = connection.prepareStatement(sql);
-            preparedStatement.setString(1, name);
-            preparedStatement.executeUpdate();
+            String sql =
+                    "INSERT INTO item (id, name, item_type, category) "+
+                        "VALUES (?, ?, ?, ?);";
+            PreparedStatement st = connection.prepareStatement(sql);
+            st.setString(1, id);
+            st.setString(2, name);
+            st.setString(3, item_type);
+            st.setInt(4, category);
+            st.execute();
         } catch (SQLException e){
-            logger.info(e.getMessage());
+            e.printStackTrace();
         }
     }
     public void dropTable(){
         try {
             this.statement.executeUpdate("DROP TABLE item");
         } catch (SQLException e){
-            logger.info(e.getMessage());
+            e.printStackTrace();
         }
     }
     public static SleepItemDao getInstance() {

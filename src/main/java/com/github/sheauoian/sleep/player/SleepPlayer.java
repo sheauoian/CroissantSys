@@ -1,18 +1,24 @@
 package com.github.sheauoian.sleep.player;
 
-import com.github.sheauoian.sleep.Sleep;
-import com.github.sheauoian.sleep.api.fastboard.FastBoard;
+import com.github.sheauoian.sleep.dao.storage.StorageItemDao;
+import com.github.sheauoian.sleep.dao.user.UserInfoDao;
+import com.github.sheauoian.sleep.item.StorageItem;
+import com.github.sheauoian.sleep.storage.Storage;
 import com.github.sheauoian.sleep.util.UserLevelUp;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Sound;
 import org.bukkit.SoundCategory;
 import org.bukkit.entity.Player;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 public class SleepPlayer extends UserInfo {
     public final Player player;
-    private final FastBoard board;
+    public final Map<String, StorageItem> storageItem;
+    public final Storage storage;
     public SleepPlayer
             (
             UUID uuid,
@@ -29,10 +35,15 @@ public class SleepPlayer extends UserInfo {
     {
         super(uuid, first_login, last_login, level, xp, strength, defence, health, max_health);
         this.player = player;
-        this.board = new FastBoard(player);
-        //this.board.updateTitle(Component.text("aaaaa"));
-        //this.board.updateLine(1, Component.text("hello"));
+        this.storageItem = new HashMap<>();
+        this.storage = new Storage(this);
     }
+
+    public void save() {
+        UserInfoDao.getInstance().update(this);
+        StorageItemDao.getInstance().update(storageItem.values());
+    }
+
     public void sideBar() {
         //board.updateLine(1, Component.text("qwerty"));
     }

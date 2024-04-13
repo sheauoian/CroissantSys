@@ -17,7 +17,7 @@ public class UserInfoDao extends Dao {
     @Override
     public void createTable(){
         try {
-            this.statement.executeQuery(
+            this.statement.execute(
                     """
                         CREATE TABLE IF NOT EXISTS user
                         (
@@ -32,9 +32,8 @@ public class UserInfoDao extends Dao {
                             max_health REAL DEFAULT 10
                         );
                         """);
-            this.connection.commit();
         } catch (SQLException e) {
-            logger.info(e.getMessage());
+            e.printStackTrace();
         }
     }
 
@@ -87,7 +86,7 @@ public class UserInfoDao extends Dao {
                 );
             }
         } catch (SQLException e) {
-            logger.info(e.getMessage());
+            e.printStackTrace();
         }
         return null;
     }
@@ -110,7 +109,7 @@ public class UserInfoDao extends Dao {
                         """, values);
             statement.executeUpdate(sql);
         } catch (SQLException e) {
-            logger.info(e.getMessage());
+            e.printStackTrace();
         }
     }
     // Update an UserInfo Column.
@@ -135,9 +134,9 @@ public class UserInfoDao extends Dao {
                     info.getHealth(),
                     info.getMaxHealth(),
                     info.uuid);
-            statement.executeUpdate(sql);
+            statement.execute(sql);
         } catch (SQLException e) {
-            logger.info(e.getMessage());
+            e.printStackTrace();
         }
     }
 
