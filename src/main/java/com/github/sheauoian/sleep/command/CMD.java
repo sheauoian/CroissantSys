@@ -13,7 +13,7 @@ public abstract class CMD implements CommandExecutor {
         if (this.getInstance() == null)
             throw new NullPointerException("Instance is null");
         if (this.getCommandName() == null)
-            throw new NullPointerException("CommandName is null");
+            throw new NullPointerException("Command name is null");
         this.register();
     }
     final Sleep getPlugin() {

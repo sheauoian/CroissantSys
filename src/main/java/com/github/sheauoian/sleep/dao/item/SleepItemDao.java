@@ -34,13 +34,12 @@ public class SleepItemDao extends Dao {
                 String name = rs.getString("name");
                 String item_type = rs.getString("item_type");
                 int category = rs.getInt("category");
-                logger.info(name);
                 ret.add(new SleepItem(id, name, item_type, category));
             }
             rs.close();
             return ret;
         } catch (SQLException e){
-            e.printStackTrace();
+            logger.info(e.getMessage());
         }
         return null;
     }

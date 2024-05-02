@@ -20,3 +20,5 @@ commands:
         description: Sleep User を統括します
     storage:
         description: Storage を開きます
+    warp_point:
+        description: WarpPoint を統括します

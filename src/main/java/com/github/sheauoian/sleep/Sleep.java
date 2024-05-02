@@ -1,9 +1,6 @@
 package com.github.sheauoian.sleep;
 
-import com.github.sheauoian.sleep.command.ItemCMD;
-import com.github.sheauoian.sleep.command.SleepCMD;
-import com.github.sheauoian.sleep.command.StorageCMD;
-import com.github.sheauoian.sleep.command.UserInfoCMD;
+import com.github.sheauoian.sleep.command.*;
 import com.github.sheauoian.sleep.dao.item.SleepItemDao;
 import com.github.sheauoian.sleep.dao.storage.StorageItemDao;
 import com.github.sheauoian.sleep.dao.user.UserInfoDao;
@@ -12,10 +9,9 @@ import com.github.sheauoian.sleep.listener.PlayerJoinListener;
 import com.github.sheauoian.sleep.listener.PlayerPickUpListener;
 import com.github.sheauoian.sleep.player.PlayerLoop;
 import com.github.sheauoian.sleep.player.UserManager;
-import com.github.sheauoian.sleep.storage.Storage;
+import com.github.sheauoian.sleep.warppoint.WarpPointManager;
 import mc.obliviate.inventory.InventoryAPI;
 import org.bukkit.Bukkit;
-import org.bukkit.entity.Player;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -25,12 +21,14 @@ public final class Sleep extends JavaPlugin {
     public static Sleep instance;
     public static Logger logger;
     public static UserManager userManager;
+    public static WarpPointManager warpPointManager;
     @Override
     public void onEnable() {
         instance = this;
         logger = getLogger();
         PluginManager manager = Bukkit.getPluginManager();
         userManager = new UserManager();
+        warpPointManager = new WarpPointManager();
         new InventoryAPI(this).init();
 
         // Database - Create Tables
@@ -38,11 +36,15 @@ public final class Sleep extends JavaPlugin {
         SleepItemDao.getInstance().createTable();
         StorageItemDao.getInstance().createTable();
 
+        warpPointManager.init();
+
+
         // Commands
         new SleepCMD(this);
         new ItemCMD(this);
         new UserInfoCMD(this);
         new StorageCMD(this);
+        new WarpPointCMD(this);
 
         // Listeners
         manager.registerEvents(new PlayerJoinListener(), this);
@@ -56,6 +58,7 @@ public final class Sleep extends JavaPlugin {
     @Override
     public void onDisable() {
         userManager.close();
+        warpPointManager.save();
         DbDriver.singleton().closeConnection();
         getLogger().info("good night ;)");
     }

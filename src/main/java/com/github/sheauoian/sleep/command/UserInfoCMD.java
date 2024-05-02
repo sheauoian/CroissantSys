@@ -2,25 +2,15 @@ package com.github.sheauoian.sleep.command;
 
 import com.github.sheauoian.sleep.DbDriver;
 import com.github.sheauoian.sleep.Sleep;
-import com.github.sheauoian.sleep.dao.user.UserInfoDao;
-import com.github.sheauoian.sleep.item.SleepItem;
 import com.github.sheauoian.sleep.dao.item.SleepItemDao;
 import com.github.sheauoian.sleep.player.SleepPlayer;
 import com.github.sheauoian.sleep.player.UserInfo;
-import com.github.sheauoian.sleep.player.UserManager;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.Style;
-import net.kyori.adventure.text.format.TextDecoration;
-import net.kyori.adventure.text.serializer.json.JSONComponentSerializer;
-import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -29,7 +19,14 @@ import java.sql.SQLException;
 import java.util.*;
 
 public class UserInfoCMD extends CMD implements TabCompleter {
-    private final String[] completeList = new String[] { "list", "strength", "defence", "max_health", "info", "manager" };
+    private final String[] completeList = new String[] {
+            "list",
+            "strength",
+            "defence",
+            "max_health",
+            "info",
+            "manager"
+    };
     public UserInfoCMD(Sleep plugin) {
         super(plugin);
     }
