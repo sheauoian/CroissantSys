@@ -12,6 +12,7 @@ public class PlayerLoop extends BukkitRunnable {
                     Sleep.userManager.remove(sleepPlayer.player);
                     continue;
                 }
+
                 sleepPlayer.sideBar();
             }
         }

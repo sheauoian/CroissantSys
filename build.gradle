@@ -39,7 +39,7 @@ dependencies {
     // NBT API
     compileOnly("de.tr7zw:item-nbt-api-plugin:2.12.3")
     // FastBoard
-    implementation('fr.mrmicky:fastboard:2.1.0')
+    implementation('fr.mrmicky:fastboard:2.1.2')
     // Protocol Lib
     compileOnly("com.comphenix.protocol:ProtocolLib:5.1.0")
     // Mythic API
@@ -56,6 +56,10 @@ dependencies {
     implementation("com.github.hamza-cskn.obliviate-invs:pagination:4.3.0")
 }
 
+shadowJar {
+    // Replace 'com.yourpackage' with the package of your plugin
+    relocate 'fr.mrmicky.fastboard', 'com.github.sheauoian.sleep.api.fastboard'
+}
 
 def targetJavaVersion = 17
 java {

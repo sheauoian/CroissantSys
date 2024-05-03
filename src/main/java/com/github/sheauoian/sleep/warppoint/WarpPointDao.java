@@ -10,8 +10,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import com.github.sheauoian.sleep.Sleep;
+import org.bukkit.entity.Player;
 
 public class WarpPointDao extends Dao {
     private static final WarpPointDao singleton = new WarpPointDao();
@@ -19,10 +21,12 @@ public class WarpPointDao extends Dao {
     public WarpPointDao() {
         createTable();
         try {
+            statement.execute("ALTER TABLE warp_points ADD color_1 STRING NULL;");
+            statement.execute("ALTER TABLE warp_points ADD color_2 STRING NULL;");
             get = connection.prepareStatement("SELECT * FROM warp_points WHERE id = ?");
             getAll = connection.prepareStatement("SELECT * FROM warp_points");
-            insert = connection.prepareStatement("INSERT INTO warp_points (id, name, world, x, y, z) "+
-                    "VALUES (?, ?, ?, ?, ?, ?);");
+            insert = connection.prepareStatement("INSERT OR IGNORE INTO warp_points (id, name, world, x, y, z, r) "+
+                    "VALUES (?, ?, ?, ?, ?, ?, ?);");
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -40,7 +44,8 @@ public class WarpPointDao extends Dao {
                             world STRING NOT NULL,
                             x INTEGER NOT NULL,
                             y INTEGER NOT NULL,
-                            z INTEGER NOT NULL
+                            z INTEGER NOT NULL,
+                            r REAL NOT NULL
                         );
                         """);
         } catch (SQLException e) {
@@ -58,7 +63,9 @@ public class WarpPointDao extends Dao {
                 int x = rs.getInt("x");
                 int y = rs.getInt("y");
                 int z = rs.getInt("z");
-                return new WarpPoint(id, name, new Location(world, x, y, z));
+                Location loc = new Location(world, x, y, z);
+                loc.setYaw(rs.getFloat("r"));
+                return new WarpPoint(id, name, loc);
             }
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -76,7 +83,9 @@ public class WarpPointDao extends Dao {
                 int x = rs.getInt("x");
                 int y = rs.getInt("y");
                 int z = rs.getInt("z");
-                warpPoints.add(new WarpPoint(id, name, new Location(world, x, y, z)));
+                Location loc = new Location(world, x, y, z);
+                loc.setYaw(rs.getFloat("r"));
+                warpPoints.add(new WarpPoint(id, name, loc));
             }
             return warpPoints;
         } catch (SQLException e) {
@@ -92,6 +101,7 @@ public class WarpPointDao extends Dao {
                 insert.setInt(4, warpPoint.getLocation().getBlockX());
                 insert.setInt(5, warpPoint.getLocation().getBlockY());
                 insert.setInt(6, warpPoint.getLocation().getBlockZ());
+                insert.setFloat(7, warpPoint.getLocation().getYaw());
                 insert.execute();
             }
         } catch (SQLException e) {

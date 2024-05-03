@@ -9,6 +9,7 @@ import com.github.sheauoian.sleep.listener.PlayerJoinListener;
 import com.github.sheauoian.sleep.listener.PlayerPickUpListener;
 import com.github.sheauoian.sleep.player.PlayerLoop;
 import com.github.sheauoian.sleep.player.UserManager;
+import com.github.sheauoian.sleep.warppoint.UnlockedWarpPointDao;
 import com.github.sheauoian.sleep.warppoint.WarpPointManager;
 import mc.obliviate.inventory.InventoryAPI;
 import org.bukkit.Bukkit;
@@ -35,7 +36,7 @@ public final class Sleep extends JavaPlugin {
         UserInfoDao.getInstance().createTable();
         SleepItemDao.getInstance().createTable();
         StorageItemDao.getInstance().createTable();
-
+        UnlockedWarpPointDao.getInstance().createTable();
         warpPointManager.init();
 
 
@@ -45,6 +46,7 @@ public final class Sleep extends JavaPlugin {
         new UserInfoCMD(this);
         new StorageCMD(this);
         new WarpPointCMD(this);
+        new WarpCMD(this);
 
         // Listeners
         manager.registerEvents(new PlayerJoinListener(), this);

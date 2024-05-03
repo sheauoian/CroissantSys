@@ -2,10 +2,17 @@ package com.github.sheauoian.sleep.player;
 
 import com.github.sheauoian.sleep.dao.storage.StorageItemDao;
 import com.github.sheauoian.sleep.dao.user.UserInfoDao;
+import com.github.sheauoian.sleep.direction.SleepDirection;
 import com.github.sheauoian.sleep.item.StorageItem;
 import com.github.sheauoian.sleep.storage.Storage;
+import com.github.sheauoian.sleep.util.SidebarTitle;
 import com.github.sheauoian.sleep.util.UserLevelUp;
+import com.github.sheauoian.sleep.warppoint.UnlockedWarpPointDao;
+import com.github.sheauoian.sleep.warppoint.WarpPointDao;
+import com.github.sheauoian.sleep.warppoint.WarpUI;
+import fr.mrmicky.fastboard.adventure.FastBoard;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Sound;
 import org.bukkit.SoundCategory;
 import org.bukkit.entity.Player;
@@ -18,7 +25,10 @@ import java.util.UUID;
 public class SleepPlayer extends UserInfo {
     public final Player player;
     public final Map<String, StorageItem> storageItem;
+    public final WarpUI warp_ui;
     public final Storage storage;
+    public final FastBoard board;
+    public final SleepDirection direction;
     public SleepPlayer
             (
             UUID uuid,
@@ -37,6 +47,10 @@ public class SleepPlayer extends UserInfo {
         this.player = player;
         this.storageItem = new HashMap<>();
         this.storage = new Storage(this);
+        this.board = new FastBoard(player);
+        board.updateTitle(SidebarTitle.getSidebarTitle());
+        this.direction = new SleepDirection(player);
+        this.warp_ui = new WarpUI(this);
     }
 
     public void save() {
@@ -45,7 +59,10 @@ public class SleepPlayer extends UserInfo {
     }
 
     public void sideBar() {
-        //board.updateLine(1, Component.text("qwerty"));
+        board.updateLine(1, Component.text(String.format("レベル: %d (残り %f xp)",
+                level,
+                required_xp - xp
+        )));
     }
     public void actionBar() {
         player.sendActionBar(Component.text(health + " / " + max_health));

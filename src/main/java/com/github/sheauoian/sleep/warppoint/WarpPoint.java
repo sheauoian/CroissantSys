@@ -1,17 +1,16 @@
 package com.github.sheauoian.sleep.warppoint;
 
+import com.github.sheauoian.sleep.Sleep;
 import eu.decentsoftware.holograms.api.DHAPI;
 import eu.decentsoftware.holograms.api.actions.Action;
 import eu.decentsoftware.holograms.api.actions.ActionType;
 import eu.decentsoftware.holograms.api.actions.ClickType;
 import eu.decentsoftware.holograms.api.holograms.Hologram;
-import eu.decentsoftware.holograms.api.holograms.HologramLine;
 import eu.decentsoftware.holograms.api.holograms.HologramPage;
-import net.kyori.adventure.text.Component;
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
+import java.util.List;
 import java.util.Objects;
 
 public class WarpPoint {
@@ -34,14 +33,34 @@ public class WarpPoint {
         DHAPI.createHologram(holo_id, holo_loc, false);
         Hologram holo = DHAPI.getHologram(holo_id);
         HologramPage page = Objects.requireNonNull(holo).getPage(0);
-        DHAPI.addHologramLine(Objects.requireNonNull(holo), this.name);
+        DHAPI.addHologramLine(holo,"<#ED80af>ワープポイント</#aa55ce>");
+        DHAPI.addHologramLine(holo, this.name);
         Action clickAction = new Action(ActionType.NONE, holo_id) {
             @Override
             public boolean execute(Player player) {
-                player.sendMessage(String.format(
-                        "ワープポイント [%s] を開放しました",
-                        name
-                ));
+                List<String> a = UnlockedWarpPointDao.getInstance().getUnlockedIds(player);
+                Sleep.logger.info("AMount: " + a.size());
+                if (!a.contains(id)) {
+                    WarpPoint point = Sleep.warpPointManager.get(id);
+                    if (point != null) {
+                        player.sendMessage(String.format(
+                                "ワープポイント [%s] を開放しました",
+                                name
+                        ));
+                        UnlockedWarpPointDao.getInstance().insert(player, point);
+                    } else {
+                        player.sendMessage(String.format(
+                                "ワープポイント [%s] は登録されていませんでした",
+                                id
+                        ));
+                    }
+                } else {
+                    player.sendMessage(String.format(
+                            "ワープポイント [%s] は既に開放済です",
+                            name
+                    ));
+                }
+
                 return true;
             }
         };

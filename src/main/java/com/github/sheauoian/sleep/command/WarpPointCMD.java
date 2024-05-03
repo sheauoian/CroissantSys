@@ -2,6 +2,7 @@ package com.github.sheauoian.sleep.command;
 
 import com.github.sheauoian.sleep.Sleep;
 import com.github.sheauoian.sleep.warppoint.WarpPoint;
+import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
@@ -33,7 +34,12 @@ public class WarpPointCMD extends CMD implements TabCompleter {
             }
             else if (args[0].equals(completeList[1])) {
                 if (args.length >= 3 && sender instanceof Player p) {
-                    Sleep.warpPointManager.put(args[1], new WarpPoint(args[1], args[2], p.getLocation()));
+                    Location loc = p.getLocation();
+                    loc.setX(loc.getBlockX());
+                    loc.setY(loc.getBlockY());
+                    loc.setZ(loc.getBlockZ());
+                    Sleep.warpPointManager.put(args[1], new WarpPoint(args[1], args[2], loc));
+                    Sleep.warpPointManager.save();
                 }
             } else if (args[0].equals(completeList[2])) {
                 for (WarpPoint warpPoint : Sleep.warpPointManager.getAll()) {

@@ -22,3 +22,5 @@ commands:
         description: Storage を開きます
     warp_point:
         description: WarpPoint を統括します
+    warp:
+        description: Warp します

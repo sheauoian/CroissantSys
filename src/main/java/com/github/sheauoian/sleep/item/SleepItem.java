@@ -30,6 +30,10 @@ public class SleepItem {
         this.category = category;
     }
 
+    public String getId() {
+        return this.item_id;
+    }
+
 
     public ItemStack getItemStack() {
         ItemStack item = new ItemStack(this.material);
