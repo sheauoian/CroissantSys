@@ -10,4 +10,11 @@ JDK 17 ?
 ProtocolLib
 NBTAPI
 MythicMobs
+Decent Holograms
+Hologram API
+```
+
+依存関係
+```
+FastBoard
 ```
