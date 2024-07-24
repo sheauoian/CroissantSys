@@ -1,6 +1,6 @@
-package com.github.sheauoian.sleep.warppoint;
+package com.github.sheauoian.sleep.dao;
 
-import com.github.sheauoian.sleep.dao.Dao;
+import com.github.sheauoian.sleep.common.warppoint.WarpPoint;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -10,10 +10,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 import com.github.sheauoian.sleep.Sleep;
-import org.bukkit.entity.Player;
 
 public class WarpPointDao extends Dao {
     private static final WarpPointDao singleton = new WarpPointDao();
@@ -21,8 +19,6 @@ public class WarpPointDao extends Dao {
     public WarpPointDao() {
         createTable();
         try {
-            statement.execute("ALTER TABLE warp_points ADD color_1 STRING NULL;");
-            statement.execute("ALTER TABLE warp_points ADD color_2 STRING NULL;");
             get = connection.prepareStatement("SELECT * FROM warp_points WHERE id = ?");
             getAll = connection.prepareStatement("SELECT * FROM warp_points");
             insert = connection.prepareStatement("INSERT OR IGNORE INTO warp_points (id, name, world, x, y, z, r) "+
@@ -45,7 +41,9 @@ public class WarpPointDao extends Dao {
                             x INTEGER NOT NULL,
                             y INTEGER NOT NULL,
                             z INTEGER NOT NULL,
-                            r REAL NOT NULL
+                            r REAL NOT NULL,
+                            color_1 STRING,
+                            color_2 STRING
                         );
                         """);
         } catch (SQLException e) {
@@ -119,7 +117,6 @@ public class WarpPointDao extends Dao {
             logger.info(e.getMessage());
         }
     }
-
     public static WarpPointDao getInstance() {
         return singleton;
     }

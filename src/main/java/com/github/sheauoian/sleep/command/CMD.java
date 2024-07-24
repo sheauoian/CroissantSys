@@ -8,12 +8,9 @@ import org.bukkit.command.TabCompleter;
 public abstract class CMD implements CommandExecutor {
     private static Sleep plugin;
     public CMD(Sleep plugin) {
-        if (this.getPlugin() == null)
-            this.setPlugin(plugin);
-        if (this.getInstance() == null)
-            throw new NullPointerException("Instance is null");
-        if (this.getCommandName() == null)
-            throw new NullPointerException("Command name is null");
+        if (this.getPlugin() == null) this.setPlugin(plugin);
+        if (this.getInstance() == null) throw new NullPointerException("Instance is null");
+        if (this.getCommandName() == null) throw new NullPointerException("Command name is null");
         this.register();
     }
     final Sleep getPlugin() {
@@ -21,7 +18,7 @@ public abstract class CMD implements CommandExecutor {
     }
     final void setPlugin(Sleep instance) {
         if (instance == null)
-            throw new IllegalArgumentException("CommandにSleepが正常に渡されませんでした");
+            throw new IllegalArgumentException("Command[/sleep:<none>] の登録に失敗しました");
         CMD.plugin = instance;
     }
     public void register() {

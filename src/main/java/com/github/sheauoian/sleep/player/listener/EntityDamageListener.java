@@ -1,26 +1,19 @@
-package com.github.sheauoian.sleep.listener;
+package com.github.sheauoian.sleep.player.listener;
 
 import com.github.sheauoian.sleep.Sleep;
-import com.github.sheauoian.sleep.player.SleepPlayer;
-import com.github.sheauoian.sleep.player.UserInfo;
-import com.github.sheauoian.sleep.player.UserManager;
-import io.lumine.mythic.api.adapters.AbstractEntity;
+import com.github.sheauoian.sleep.player.OnlineUser;
 import io.lumine.mythic.bukkit.MythicBukkit;
-import org.bukkit.Bukkit;
 import org.bukkit.Sound;
 import org.bukkit.entity.Entity;
-import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.entity.EntityDamageByBlockEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
-import org.bukkit.inventory.ItemStack;
 
 public class EntityDamageListener implements Listener {
 
@@ -34,9 +27,9 @@ public class EntityDamageListener implements Listener {
                 e.setCancelled(true);
                 return;
             }
-            else if (attacker instanceof Player) {
-                SleepPlayer info = Sleep.userManager.get((Player) attacker);
-                double damage = info.getStrength();
+            else if (attacker instanceof Player player) {
+                OnlineUser user = Sleep.userManager.getOnlineUser(player.getUniqueId().toString());
+                double damage = user.info.getStrength();
                 boolean isMythicMob = MythicBukkit.inst().getMobManager().isMythicMob(victim);
                 boolean isCritical = e_.isCritical();
                 boolean isSweep = e_.getCause().equals(DamageCause.ENTITY_SWEEP_ATTACK);
@@ -48,7 +41,7 @@ public class EntityDamageListener implements Listener {
                 e.setDamage(damage);
                 attacker.sendMessage(
                         String.format("ダメージをあたえました %s, %s, %s, %s -> %s",
-                                info.getStrength(),
+                                user.info.getStrength(),
                                 isMythicMob,
                                 isCritical,
                                 isSweep,
@@ -57,8 +50,8 @@ public class EntityDamageListener implements Listener {
                 );
             }
         }
-        if (victim instanceof Player) {
-            SleepPlayer info = Sleep.userManager.get((Player) victim);
+        if (victim instanceof Player player) {
+            OnlineUser info = Sleep.userManager.getOnlineUser(player.getUniqueId().toString());
             if (info.damage((float)e.getDamage())) {
                 e.setDamage(0);
             } else {
@@ -69,7 +62,7 @@ public class EntityDamageListener implements Listener {
 
     @EventHandler
     public void onRespawn(PlayerRespawnEvent e) {
-        Sleep.userManager.get(e.getPlayer()).resetHealth();
+        Sleep.userManager.getOnlineUser(e.getPlayer().getUniqueId().toString()).resetHealth();
     }
 
     @EventHandler
@@ -85,7 +78,7 @@ public class EntityDamageListener implements Listener {
                         1.5f,
                         1.5f
                 );
-                Sleep.userManager.get(p).getXp(100);
+                Sleep.userManager.getOnlineUser(p.getUniqueId().toString()).getXp(100);
             }
         }
     }

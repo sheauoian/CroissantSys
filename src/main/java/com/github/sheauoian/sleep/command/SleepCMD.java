@@ -1,7 +1,6 @@
 package com.github.sheauoian.sleep.command;
 
 import com.github.sheauoian.sleep.Sleep;
-import com.github.sheauoian.sleep.direction.SleepDirection;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
@@ -34,14 +33,14 @@ public class SleepCMD extends CMD implements TabCompleter {
                 sender.sendMessage("/sleep help : ヘルプを表示します");
             } else if (args[0].equals(completeList[2])) {
                 if (sender instanceof Player p) {
-                    Sleep.userManager.get(p).resetHealth();
+                    Sleep.userManager.getOnlineUser(p).resetHealth();
                     p.sendMessage("HPをリセットしました");
                 } else {
                     sender.sendMessage("このコマンドはプレイヤーのみぞつかうことができよう");
                 }
             } else if (args[0].equals(completeList[3])) {
                 if (sender instanceof Player p) {
-                    Sleep.userManager.get(p).direction.fadeInOut();
+                    Sleep.userManager.getOnlineUser(p).direction.fadeInOut();
                 } else {
                     sender.sendMessage("このコマンドはプレイヤーのみぞつかうことができよう");
                 }

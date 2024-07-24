@@ -1,6 +1,5 @@
-package com.github.sheauoian.sleep.warppoint;
+package com.github.sheauoian.sleep.common.warppoint;
 
-import com.github.sheauoian.sleep.Sleep;
 import com.github.sheauoian.sleep.dao.Dao;
 import org.bukkit.entity.Player;
 
@@ -16,11 +15,12 @@ public class UnlockedWarpPointDao extends Dao {
     public UnlockedWarpPointDao() {
         createTable();
         try {
-            has = connection.prepareStatement("SELECT uuid FROM unlocked_warp_points WHERE uuid = ? AND warp_point_id = ? LIMIT 1");
-            getUnlockedIds = connection.prepareStatement("SELECT warp_point_id FROM unlocked_warp_points WHERE uuid = ?");
+            has = connection.prepareStatement(
+                    "SELECT uuid FROM unlocked_warp_points WHERE uuid = ? AND warp_point_id = ? LIMIT 1");
+            getUnlockedIds = connection.prepareStatement(
+                    "SELECT warp_point_id FROM unlocked_warp_points WHERE uuid = ?");
             insert = connection.prepareStatement(
-                    "INSERT OR IGNORE INTO unlocked_warp_points (uuid, warp_point_id) " +
-                    "VALUES (?, ?);");
+                    "INSERT OR IGNORE INTO unlocked_warp_points (uuid, warp_point_id) VALUES (?, ?);");
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }

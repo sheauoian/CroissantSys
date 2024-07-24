@@ -2,15 +2,14 @@ package com.github.sheauoian.sleep.player;
 
 import com.github.sheauoian.sleep.util.UserLevelUp;
 
-import java.util.UUID;
-
 public class UserInfo {
-    public final UUID uuid;
+    public final String uuid;
+    private final EquipSlot equipSlot;
     final String first_login, last_login;
     int level;
     float xp, required_xp, strength, defence, max_health, health;
     public UserInfo(
-            UUID uuid,
+            String uuid,
             String first_login,
             String last_login,
             int level,
@@ -22,6 +21,7 @@ public class UserInfo {
             )
     {
         this.uuid = uuid;
+        this.equipSlot = new EquipSlot(this);
         this.first_login = first_login;
         this.last_login = last_login;
         this.level = level;

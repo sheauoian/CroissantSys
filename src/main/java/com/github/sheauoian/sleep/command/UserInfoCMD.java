@@ -3,7 +3,6 @@ package com.github.sheauoian.sleep.command;
 import com.github.sheauoian.sleep.DbDriver;
 import com.github.sheauoian.sleep.Sleep;
 import com.github.sheauoian.sleep.dao.item.SleepItemDao;
-import com.github.sheauoian.sleep.player.SleepPlayer;
 import com.github.sheauoian.sleep.player.UserInfo;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
@@ -37,8 +36,9 @@ public class UserInfoCMD extends CMD implements TabCompleter {
             @NotNull String text,
             @NotNull String[] args)
     {
-        SleepItemDao dao = SleepItemDao.getInstance();
         if (args.length >= 1) {
+
+            // list - show all users
             if (args[0].equals(completeList[0])) {
                 try {
                     ResultSet rs = DbDriver.singleton()
@@ -46,43 +46,60 @@ public class UserInfoCMD extends CMD implements TabCompleter {
                     while (rs.next()) {
                         @Nullable
                         String mcid = Bukkit.getOfflinePlayer(rs.getString("uuid")).getName();
-                        sender.sendMessage(String.format("%s: %s",
+                        sender.sendMessage(
+                                String.format("%s: %s",
                                 rs.getString("uuid"),
-                                Objects.requireNonNullElse(mcid, "不明のプレイヤー")));
+                                Objects.requireNonNullElse(mcid, "*Unknown*")
+                                ));
                     }
                 } catch(SQLException e) {
                     Sleep.logger.info(e.getMessage());
                 }
-            } else if (args[0].equals(completeList[1])) {
+            }
+
+            // strength
+            else if (args[0].equals(completeList[1])) {
                 if (args.length >= 2 && sender instanceof Player p) {
                     float strength = Float.parseFloat(args[1]);
-                    Sleep.userManager.get(p).setStrength(strength);
+                    String uuid = p.getUniqueId().toString();
+                    Sleep.userManager.getInfo(uuid).setStrength(strength);
                 }
-            } else if (args[0].equals(completeList[2])) {
+            }
+
+            // defence
+            else if (args[0].equals(completeList[2])) {
                 if (args.length >= 2 && sender instanceof Player p) {
                     float defence = Float.parseFloat(args[1]);
-                    Sleep.userManager.get(p).setDefence(defence);
+                    String uuid = p.getUniqueId().toString();
+                    Sleep.userManager.getInfo(uuid).setDefence(defence);
                 }
-            } else if (args[0].equals(completeList[3])) {
+            }
+
+            // max health
+            else if (args[0].equals(completeList[3])) {
                 if (args.length >= 2 && sender instanceof Player p) {
                     float max_health = Float.parseFloat(args[1]);
-                    Sleep.userManager.get(p).setMaxHealth(max_health);
+                    String uuid = p.getUniqueId().toString();
+                    Sleep.userManager.getInfo(uuid).setMaxHealth(max_health);
                 }
-            } else if (args[0].equals(completeList[4])) {
-                if (args.length >= 2) {
-                    OfflinePlayer player = Bukkit.getServer().getOfflinePlayer(UUID.fromString(args[1]));
-                    UserInfo info = Sleep.userManager.get(player);
-                    if (info != null) {
-                        boolean isSleepPlayer = info instanceof SleepPlayer;
-                        sender.sendMessage(String.format("存在しました: %s", player.getName()));
-                        sender.sendMessage(String.format("SleepPlayerか: %s", isSleepPlayer));
-                    } else {
-                        sender.sendMessage("存在しませんでした");
-                    }
+            }
+
+            // info - show info
+            else if (args[0].equals(completeList[4])) {
+                UserInfo info;
+                if (args.length >= 2)
+                    info = Sleep.userManager.getInfo(args[1]);
+                else if (sender instanceof Player p)
+                    info = Sleep.userManager.getInfo(p.getUniqueId().toString());
+                else return false;
+                if (info != null) {
+                    sender.sendMessage(String.format("存在しました: %s", info.uuid));
+                } else {
+                    sender.sendMessage("That account is not exist");
                 }
             } else if (args[0].equals(completeList[5])) {
-                for (UserInfo info : Sleep.userManager.getAll()) {
-                    sender.sendMessage(info.uuid.toString());
+                for (UserInfo info : Sleep.userManager.getLoadedUsers()) {
+                    sender.sendMessage(info.uuid);
                 }
             }
         }
@@ -115,11 +132,7 @@ public class UserInfoCMD extends CMD implements TabCompleter {
     }
 
     @Override
-    CMD getInstance() {
-        return this;
-    }
+    CMD getInstance() { return this; }
     @Override
-    public String getCommandName() {
-        return "user";
-    }
+    public String getCommandName() { return "user"; }
 }

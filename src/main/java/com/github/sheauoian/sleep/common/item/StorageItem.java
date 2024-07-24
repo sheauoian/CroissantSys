@@ -1,4 +1,4 @@
-package com.github.sheauoian.sleep.item;
+package com.github.sheauoian.sleep.common.item;
 
 import com.github.sheauoian.sleep.DbDriver;
 import org.bukkit.Material;
@@ -6,16 +6,15 @@ import org.bukkit.Material;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.UUID;
 
 import static com.github.sheauoian.sleep.Sleep.logger;
 
 public class StorageItem extends CollectableItem{
-    public final UUID uuid;
+    public final String uuid;
     public final String item_id;
     public final Material material;
 
-    public StorageItem(UUID uuid, String item_id, int amount) {
+    public StorageItem(String uuid, String item_id, int amount) {
         super(amount);
         this.uuid = uuid;
         this.item_id = item_id;

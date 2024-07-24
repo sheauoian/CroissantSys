@@ -24,7 +24,7 @@ public class StorageCMD extends CMD {
             @NotNull String[] args)
     {
         if (sender instanceof Player p) {
-            Sleep.userManager.get(p).storage.open();
+            Sleep.userManager.getOnlineUser(p).storage.open();
         }
         return false;
     }

@@ -1,36 +1,45 @@
 package com.github.sheauoian.sleep.player;
 
 import com.github.sheauoian.sleep.dao.user.UserInfoDao;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 
 import java.util.*;
 
 public class UserManager {
-    private static final Map<OfflinePlayer, UserInfo> USERS = new HashMap<>();
-    public void add(OfflinePlayer player) {
-        UserInfo info = UserInfoDao.getInstance().insertAndGet(player);
-        USERS.put(player, info);
+    private static final Map<String, UserInfo> LOADED_USERS = new HashMap<>();
+    private static final Map<UserInfo, OnlineUser> ONLINE_USERS = new HashMap<>();
+
+    // Online users data
+    public void addOnlinePlayer(Player player) {
+        UserInfo info = UserInfoDao.getInstance().insertAndGet(player.getUniqueId().toString());
+        LOADED_USERS.put(player.getUniqueId().toString(), info);
+        ONLINE_USERS.put(info, new OnlineUser(info, player));
     }
-    public UserInfo get(OfflinePlayer player) {
-        return USERS.get(player);
+    public Collection<OnlineUser> getOnlineUsers() { return ONLINE_USERS.values(); }
+    public OnlineUser getOnlineUser(Player p) { return getOnlineUser(p.getUniqueId().toString()); }
+    public OnlineUser getOnlineUser(String uuid) { return ONLINE_USERS.get(getInfo(uuid)); }
+
+    // All loaded users data
+    public void addUser(String uuid) {
+        UserInfo info = UserInfoDao.getInstance().insertAndGet(uuid);
+        LOADED_USERS.put(uuid, info);
     }
-    public SleepPlayer get(Player player) {
-        return (SleepPlayer) USERS.get(player);
+    public Collection<UserInfo> getLoadedUsers() {
+        return LOADED_USERS.values();
     }
-    public Collection<UserInfo> getAll() {
-        return USERS.values();
+    public UserInfo getInfo(String uuid) {
+        return LOADED_USERS.get(uuid);
     }
 
-    public void remove(OfflinePlayer player) {
-        UserInfo info = USERS.get(player);
-        if (info instanceof SleepPlayer sleepPlayer) sleepPlayer.save();
+    public void remove(String uuid) {
+        UserInfo info = LOADED_USERS.get(uuid);
+        if (ONLINE_USERS.containsKey(info)) ONLINE_USERS.get(info).save();
         else UserInfoDao.getInstance().update(info);
-        USERS.remove(player);
+        ONLINE_USERS.remove(info);
     }
     public void close() {
-        for (UserInfo info : USERS.values()) {
-            if (info instanceof SleepPlayer sleepPlayer) sleepPlayer.save();
+        for (UserInfo info : LOADED_USERS.values()) {
+            if (ONLINE_USERS.containsKey(info)) ONLINE_USERS.get(info).save();
             else UserInfoDao.getInstance().update(info);
         }
     }

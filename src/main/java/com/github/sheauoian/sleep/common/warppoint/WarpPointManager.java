@@ -1,4 +1,6 @@
-package com.github.sheauoian.sleep.warppoint;
+package com.github.sheauoian.sleep.common.warppoint;
+
+import com.github.sheauoian.sleep.dao.WarpPointDao;
 
 import java.util.HashMap;
 import java.util.List;
@@ -7,10 +9,9 @@ import java.util.Map;
 public class WarpPointManager {
     private static final Map<String, WarpPoint> warpPoints =  new HashMap<>();
     public void init() {
-        for (WarpPoint point : WarpPointDao.getInstance().getAll()) {
-            warpPoints.put(point.getId(), point);
-        }
+        for (WarpPoint point : WarpPointDao.getInstance().getAll()) warpPoints.put(point.getId(), point);
     }
+
     public void drop() {
         warpPoints.clear();
         WarpPointDao.getInstance().drop();

@@ -1,10 +1,11 @@
 package com.github.sheauoian.sleep.command;
 
 import com.github.sheauoian.sleep.Sleep;
-import com.github.sheauoian.sleep.item.SleepItem;
+import com.github.sheauoian.sleep.common.item.SleepItem;
+import com.github.sheauoian.sleep.dao.item.EquipmentDao;
 import com.github.sheauoian.sleep.dao.item.SleepItemDao;
+import com.github.sheauoian.sleep.util.Rarity;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.serializer.json.JSONComponentSerializer;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
@@ -22,7 +23,7 @@ import java.util.List;
 import java.util.Objects;
 
 public class ItemCMD extends CMD implements TabCompleter {
-    private final String[] completeList = new String[] { "list", "register", "rename", "get", "drop", "info" };
+    private final String[] completeList = new String[] { "list", "register", "rename", "get", "drop", "info", "add_equipment"};
     public ItemCMD(Sleep plugin) {
         super(plugin);
     }
@@ -88,6 +89,14 @@ public class ItemCMD extends CMD implements TabCompleter {
             } else if (args[0].equals(completeList[4])) {
                 dao.dropTable();
                 dao.createTable();
+            } else if (args[0].equals(completeList[6])) {
+                if (sender instanceof Player p && args.length >= 2) {
+                    for (int i = 0; i < 10; i++)
+                        EquipmentDao.getInstance().insertIntoStorage(
+                                p.getUniqueId().toString(),
+                                args[1],
+                                Rarity.EPIC);
+                }
             }
         }
         return false;

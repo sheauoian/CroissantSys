@@ -1,4 +1,4 @@
-package com.github.sheauoian.sleep.chara;
+package com.github.sheauoian.sleep.common.chara;
 
 import java.awt.*;
 

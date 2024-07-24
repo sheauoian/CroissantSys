@@ -1,19 +1,15 @@
 package com.github.sheauoian.sleep.dao.user;
 
 import com.github.sheauoian.sleep.dao.Dao;
-import com.github.sheauoian.sleep.player.SleepPlayer;
 import com.github.sheauoian.sleep.player.UserInfo;
-import io.papermc.paper.annotation.DoNotUse;
-import org.bukkit.OfflinePlayer;
-import org.bukkit.entity.Player;
-
 import java.time.LocalDateTime;
-
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public class UserInfoDao extends Dao {
     private final static UserInfoDao singleton = new UserInfoDao();
+    public static UserInfoDao getInstance() { return singleton; }
+
     @Override
     public void createTable(){
         try {
@@ -37,19 +33,15 @@ public class UserInfoDao extends Dao {
         }
     }
 
-
-    // For Newcomers.
-    public UserInfo insertAndGet(OfflinePlayer player) {
-        this.insert(player);
-        return get(player);
+    public UserInfo insertAndGet(String uuid) {
+        this.insert(uuid);
+        return get(uuid);
     }
-    // Get an UserInfo Column.
-    public UserInfo get(OfflinePlayer player) {
+
+    public UserInfo get(String uuid) {
         try {
-            ResultSet resultSet = statement.executeQuery(String.format(
-                    "select * from user where uuid = '%s' limit 1",
-                    player.getUniqueId()
-                    )
+            ResultSet resultSet = statement.executeQuery(
+                    String.format("select * from user where uuid = '%s' limit 1", uuid)
             );
             if (resultSet.next()) {
                 String first_login = resultSet.getString("first_login");
@@ -60,21 +52,8 @@ public class UserInfoDao extends Dao {
                 float defence = resultSet.getFloat("defence");
                 float health = resultSet.getFloat("health");
                 float max_health = resultSet.getFloat("max_health");
-                if (player instanceof Player)
-                    return new SleepPlayer(
-                        player.getUniqueId(),
-                        first_login,
-                        last_login,
-                        level,
-                        xp,
-                        strength,
-                        defence,
-                        health,
-                        max_health,
-                        (Player) player
-                );
                 return new UserInfo(
-                        player.getUniqueId(),
+                        uuid,
                         first_login,
                         last_login,
                         level,
@@ -90,12 +69,13 @@ public class UserInfoDao extends Dao {
         }
         return null;
     }
+
     // Create new UserInfo Column if not exists.
-    public void insert(OfflinePlayer p) {
+    public void insert(String uuid) {
         try {
             String values = String.format(
                     "'%s','%s','%s'",
-                    p.getUniqueId(),
+                    uuid,
                     LocalDateTime.now(),
                     LocalDateTime.now()
             );
@@ -112,6 +92,7 @@ public class UserInfoDao extends Dao {
             e.printStackTrace();
         }
     }
+
     // Update an UserInfo Column.
     public void update(UserInfo info) {
         try {
@@ -138,10 +119,5 @@ public class UserInfoDao extends Dao {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-    }
-
-
-    public static UserInfoDao getInstance() {
-        return singleton;
     }
 }

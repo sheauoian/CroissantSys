@@ -1,4 +1,4 @@
-package com.github.sheauoian.sleep.warppoint;
+package com.github.sheauoian.sleep.common.warppoint;
 
 import com.github.sheauoian.sleep.Sleep;
 import eu.decentsoftware.holograms.api.DHAPI;
@@ -27,9 +27,7 @@ public class WarpPoint {
         String holo_id = "__warp__" + id;
         Location holo_loc = location.clone();
         holo_loc.add(0.5, 2, 0.5);
-        if (DHAPI.getHologram(holo_id) != null) {
-            DHAPI.removeHologram(holo_id);
-        }
+        if (DHAPI.getHologram(holo_id) != null) DHAPI.removeHologram(holo_id);
         DHAPI.createHologram(holo_id, holo_loc, false);
         Hologram holo = DHAPI.getHologram(holo_id);
         HologramPage page = Objects.requireNonNull(holo).getPage(0);
@@ -39,33 +37,27 @@ public class WarpPoint {
             @Override
             public boolean execute(Player player) {
                 List<String> a = UnlockedWarpPointDao.getInstance().getUnlockedIds(player);
-                Sleep.logger.info("AMount: " + a.size());
                 if (!a.contains(id)) {
                     WarpPoint point = Sleep.warpPointManager.get(id);
                     if (point != null) {
                         player.sendMessage(String.format(
-                                "ワープポイント [%s] を開放しました",
-                                name
+                                "ワープポイント [%s] を開放しました", name
                         ));
                         UnlockedWarpPointDao.getInstance().insert(player, point);
                     } else {
                         player.sendMessage(String.format(
-                                "ワープポイント [%s] は登録されていませんでした",
-                                id
+                                "ワープポイント [%s] は登録されていませんでした", id
                         ));
                     }
                 } else {
                     player.sendMessage(String.format(
-                            "ワープポイント [%s] は既に開放済です",
-                            name
+                            "ワープポイント [%s] は既に開放済です", name
                     ));
                 }
-
                 return true;
             }
         };
         page.addAction(ClickType.LEFT, clickAction);
-
     }
 
     public String getName() {
@@ -82,5 +74,4 @@ public class WarpPoint {
         holo_loc.add(0.5, 0, 0.5);
         p.teleport(holo_loc);
     }
-
 }

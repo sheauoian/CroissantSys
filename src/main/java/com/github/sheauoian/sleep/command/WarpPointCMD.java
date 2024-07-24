@@ -1,7 +1,7 @@
 package com.github.sheauoian.sleep.command;
 
 import com.github.sheauoian.sleep.Sleep;
-import com.github.sheauoian.sleep.warppoint.WarpPoint;
+import com.github.sheauoian.sleep.common.warppoint.WarpPoint;
 import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;

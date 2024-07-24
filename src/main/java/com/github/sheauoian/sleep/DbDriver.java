@@ -31,11 +31,9 @@ public class DbDriver {
     }
     public void closeConnection(){
         try {
-            if (this.connection != null) {
-                this.connection.close();
-            }
-        } catch (SQLException ex) {
-            System.out.println(ex.getMessage());
+            if (this.connection != null) this.connection.close();
+        } catch (SQLException e) {
+            logger.warning(e.getMessage());
         }
     }
 }

@@ -1,8 +1,7 @@
 package com.github.sheauoian.sleep.dao.item;
-import com.github.sheauoian.sleep.Sleep;
 import com.github.sheauoian.sleep.dao.Dao;
-import com.github.sheauoian.sleep.item.SleepItem;
-import org.bukkit.Bukkit;
+import com.github.sheauoian.sleep.common.item.SleepItem;
+
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;

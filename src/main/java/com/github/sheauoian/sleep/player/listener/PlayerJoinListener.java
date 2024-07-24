@@ -1,7 +1,6 @@
-package com.github.sheauoian.sleep.listener;
+package com.github.sheauoian.sleep.player.listener;
 
 import com.github.sheauoian.sleep.Sleep;
-import com.github.sheauoian.sleep.player.UserManager;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import org.bukkit.event.EventHandler;
@@ -16,11 +15,11 @@ public class PlayerJoinListener implements Listener {
                 Component.text(" Joined the game! おやすみなさい")
         );
         e.joinMessage(hello);
-        Sleep.userManager.add(e.getPlayer());
+        Sleep.userManager.addOnlinePlayer(e.getPlayer());
     }
 
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent e) {
-        Sleep.userManager.remove(e.getPlayer());
+        Sleep.userManager.remove(e.getPlayer().getUniqueId().toString());
     }
 }
