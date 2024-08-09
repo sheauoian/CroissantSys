@@ -1,4 +1,5 @@
 package com.github.sheauoian.sleep.dao.item;
+import com.github.sheauoian.sleep.common.item.ItemCategory;
 import com.github.sheauoian.sleep.dao.Dao;
 import com.github.sheauoian.sleep.common.item.SleepItem;
 
@@ -33,7 +34,12 @@ public class SleepItemDao extends Dao {
                 String name = rs.getString("name");
                 String item_type = rs.getString("item_type");
                 int category = rs.getInt("category");
-                ret.add(new SleepItem(id, name, item_type, category));
+                ret.add(new SleepItem(
+                        id,
+                        name,
+                        item_type,
+                        ItemCategory.values()[category].name()
+                ));
             }
             rs.close();
             return ret;
@@ -57,7 +63,12 @@ public class SleepItemDao extends Dao {
                 String item_type = rs.getString("item_type");
                 int category = rs.getInt("category");
                 rs.close();
-                return new SleepItem(id, name, item_type, category);
+                return new SleepItem(
+                        id,
+                        name,
+                        item_type,
+                        ItemCategory.values()[category].name()
+                );
             }
         } catch (SQLException e){
             e.printStackTrace();

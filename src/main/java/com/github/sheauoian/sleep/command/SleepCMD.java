@@ -1,10 +1,12 @@
 package com.github.sheauoian.sleep.command;
 
 import com.github.sheauoian.sleep.Sleep;
+import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -12,7 +14,7 @@ import java.util.Arrays;
 import java.util.List;
 
 public class SleepCMD extends CMD implements TabCompleter {
-    private final String[] completeList = new String[] {"version", "help", "heal", "blind"};
+    private final String[] completeList = new String[] {"help", "heal", "setspawn"};
     public SleepCMD(Sleep plugin) {
         super(plugin);
     }
@@ -25,22 +27,24 @@ public class SleepCMD extends CMD implements TabCompleter {
             @NotNull String[] args)
     {
         if (args.length >= 1) {
-            if (args[0].equals(completeList[0])) {
-                sender.sendMessage("Sleep 1.0");
-            }
-            else if (args[0].equals(completeList[1])) {
+            if (args[0].equals("help")) {
                 sender.sendMessage("/sleep version : バージョンを表示します");
                 sender.sendMessage("/sleep help : ヘルプを表示します");
-            } else if (args[0].equals(completeList[2])) {
+            } else if (args[0].equals("heal")) {
                 if (sender instanceof Player p) {
                     Sleep.userManager.getOnlineUser(p).resetHealth();
                     p.sendMessage("HPをリセットしました");
                 } else {
                     sender.sendMessage("このコマンドはプレイヤーのみぞつかうことができよう");
                 }
-            } else if (args[0].equals(completeList[3])) {
+            } else if (args[0].equals("setspawn")) {
                 if (sender instanceof Player p) {
-                    Sleep.userManager.getOnlineUser(p).direction.fadeInOut();
+                    Sleep plugin = Sleep.getInstance();
+                    Location spawn = p.getWorld().getBlockAt(p.getLocation()).getLocation();
+                    spawn.setYaw(p.getYaw());
+                    plugin.getConfig().set("spawnpoint", spawn);
+                    plugin.saveConfig();
+                    p.sendMessage("ようこそ");
                 } else {
                     sender.sendMessage("このコマンドはプレイヤーのみぞつかうことができよう");
                 }

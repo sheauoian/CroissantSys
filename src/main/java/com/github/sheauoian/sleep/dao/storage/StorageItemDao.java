@@ -1,8 +1,10 @@
 package com.github.sheauoian.sleep.dao.storage;
 
+import com.github.sheauoian.sleep.common.storage.Storage;
 import com.github.sheauoian.sleep.dao.Dao;
 import com.github.sheauoian.sleep.common.item.StorageItem;
 import com.github.sheauoian.sleep.player.OnlineUser;
+import com.github.sheauoian.sleep.player.UserInfo;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -29,6 +31,30 @@ public class StorageItemDao extends Dao {
             e.printStackTrace();
         }
     }
+
+    public List<StorageItem> getAll(String uuid) {
+        try {
+            List<StorageItem> items = new ArrayList<>();
+            String sql =
+                    """
+                    SELECT * FROM item_storage
+                        WHERE uuid = ?
+                    """;
+            PreparedStatement st = connection.prepareStatement(sql);
+            st.setString(1, uuid);
+            ResultSet rs = st.executeQuery();
+            while (rs.next()) {
+                items.add(new StorageItem(rs.getString("item_id"), rs.getInt("amount")));
+            }
+            return items;
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+
     public StorageItem get(String uuid, String item_id) {
         try {
             String sql =
@@ -42,7 +68,6 @@ public class StorageItemDao extends Dao {
             ResultSet resultSet = st.executeQuery();
             if (resultSet.next()) {
                 return new StorageItem(
-                        uuid,
                         item_id,
                         resultSet.getInt("amount")
                 );
@@ -52,44 +77,12 @@ public class StorageItemDao extends Dao {
             e.printStackTrace();
         }
         return new StorageItem(
-                uuid,
                 item_id,
                 0
         );
     }
 
-    public boolean add(OnlineUser user, String item_id, int add) {
-        boolean res = user.storageItem.containsKey(item_id);
-        if (!res) {
-            StorageItem item = new StorageItem(
-                    user.info.uuid,
-                    item_id,
-                    0);
-            try {
-                String sql =
-                        """
-                        SELECT amount FROM item_storage
-                            WHERE uuid = ? AND item_id = ? LIMIT 1
-                        """;
-                PreparedStatement st = connection.prepareStatement(sql);
-                st.setString(1, user.info.uuid);
-                st.setString(2, item_id);
-                ResultSet resultSet = st.executeQuery();
-                if (resultSet.next()) {
-                    item.amount = resultSet.getInt("amount");
-                    res = true;
-                } else {
-                    insert(item);
-                }
-            } catch (SQLException e){
-                e.printStackTrace();
-            }
-            user.storageItem.put(item_id, get(user.info.uuid, item_id));
-        }
-        user.storageItem.get(item_id).amount += add;
-        return res;
-    }
-    public void update(Collection<StorageItem> storageItem) {
+    public void update(String uuid, Storage storage) {
         try {
             String sql =
                     """
@@ -97,18 +90,18 @@ public class StorageItemDao extends Dao {
                         WHERE uuid = ? AND item_id = ?
                     """;
             PreparedStatement st = connection.prepareStatement(sql);
-            for (StorageItem item : storageItem) {
+            for (StorageItem item : storage.getStorageItems()) {
                 logger.info(item.toString());
-                st.setLong(1, item.amount);
-                st.setString(2, item.uuid.toString());
-                st.setString(3, item.item_id);
+                st.setInt(1, item.getAmount());
+                st.setString(2, uuid);
+                st.setString(3, item.getId());
                 st.execute();
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
-    public void insert(StorageItem item) {
+    public void insert(String uuid, StorageItem item) {
         try {
             String sql =
                     """
@@ -116,9 +109,9 @@ public class StorageItemDao extends Dao {
                         VALUES (?, ?, ?);
                     """;
             PreparedStatement st = connection.prepareStatement(sql);
-            st.setString(1, item.uuid.toString());
-            st.setString(2, item.item_id);
-            st.setLong(3, item.amount);
+            st.setString(1, uuid);
+            st.setString(2, item.getId());
+            st.setLong(3, item.getAmount());
             st.execute();
         } catch (SQLException e){
             e.printStackTrace();

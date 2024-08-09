@@ -16,6 +16,7 @@ public class Equipment {
         this.rarity = Rarity.values()[rarityLvl];
         this.level = level;
     }
+    public int getId() {return id;}
     public int getLevel() {return level;}
     public void levelUp(int l) {
         level += l;

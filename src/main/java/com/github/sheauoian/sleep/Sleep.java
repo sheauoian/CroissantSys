@@ -14,19 +14,22 @@ import com.github.sheauoian.sleep.common.warppoint.UnlockedWarpPointDao;
 import com.github.sheauoian.sleep.common.warppoint.WarpPointManager;
 import mc.obliviate.inventory.InventoryAPI;
 import org.bukkit.Bukkit;
+import org.bukkit.configuration.Configuration;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.logging.Logger;
 
 public final class Sleep extends JavaPlugin {
-    public static Sleep instance;
+    private static Sleep instance;
     public static Logger logger;
     public static UserManager userManager;
     public static WarpPointManager warpPointManager;
 
     @Override
     public void onEnable() {
+        saveDefaultConfig();
+
         instance = this;
         logger = getLogger();
         PluginManager manager = Bukkit.getPluginManager();
@@ -58,13 +61,19 @@ public final class Sleep extends JavaPlugin {
         // Bukkit Runtime
         new OnlineUserRunnable().runTaskTimer(this, 1L, 2L);
 
-        logger.info("sleep system has loaded successfully");
+        logger.info("sleep has loaded successfully");
     }
     @Override
     public void onDisable() {
+        saveConfig();
+
         userManager.close();
         warpPointManager.save();
         DbDriver.singleton().closeConnection();
         getLogger().info("Sainaradesu");
+    }
+
+    public static Sleep getInstance() {
+        return instance;
     }
 }

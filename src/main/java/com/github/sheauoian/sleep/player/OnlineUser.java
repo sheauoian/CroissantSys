@@ -1,15 +1,17 @@
 package com.github.sheauoian.sleep.player;
 
+import com.github.sheauoian.sleep.common.item.StorageItem;
 import com.github.sheauoian.sleep.dao.storage.StorageItemDao;
 import com.github.sheauoian.sleep.dao.user.UserInfoDao;
 import com.github.sheauoian.sleep.common.direction.SleepDirection;
-import com.github.sheauoian.sleep.common.item.StorageItem;
 import com.github.sheauoian.sleep.common.storage.Storage;
 import com.github.sheauoian.sleep.util.SidebarTitle;
 import com.github.sheauoian.sleep.util.UserLevelUp;
 import com.github.sheauoian.sleep.common.warppoint.WarpUI;
 import fr.mrmicky.fastboard.adventure.FastBoard;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.json.JSONComponentSerializer;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Sound;
 import org.bukkit.SoundCategory;
 import org.bukkit.entity.Player;
@@ -21,7 +23,6 @@ public class OnlineUser {
     public final UserInfo info;
 
     public final Player player;
-    public final Map<String, StorageItem> storageItem;
     public final WarpUI warp_ui;
     public final Storage storage;
     public final FastBoard board;
@@ -30,7 +31,6 @@ public class OnlineUser {
     public OnlineUser(UserInfo info, Player player) {
         this.info = info;
         this.player = player;
-        this.storageItem = new HashMap<>();
         this.storage = new Storage(this);
         this.board = new FastBoard(player);
         board.updateTitle(SidebarTitle.getSidebarTitle());
@@ -40,7 +40,7 @@ public class OnlineUser {
 
     public void save() {
         UserInfoDao.getInstance().update(this.info);
-        StorageItemDao.getInstance().update(storageItem.values());
+        StorageItemDao.getInstance().update(info.uuid, storage);
     }
 
     public void sideBar() {
@@ -98,5 +98,10 @@ public class OnlineUser {
         };
         updateHealthBar();
         return true;
+    }
+
+    public void message(String msg) {
+        Component comp = LegacyComponentSerializer.legacyAmpersand().deserialize(msg);
+        player.sendMessage(comp);
     }
 }

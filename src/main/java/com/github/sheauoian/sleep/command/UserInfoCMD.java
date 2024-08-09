@@ -2,9 +2,8 @@ package com.github.sheauoian.sleep.command;
 
 import com.github.sheauoian.sleep.DbDriver;
 import com.github.sheauoian.sleep.Sleep;
-import com.github.sheauoian.sleep.dao.item.SleepItemDao;
+import com.github.sheauoian.sleep.dao.user.UserInfoDao;
 import com.github.sheauoian.sleep.player.UserInfo;
-import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -17,6 +16,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
 
+import static org.bukkit.Bukkit.getOfflinePlayer;
+import static org.bukkit.Bukkit.getPlayer;
+
 public class UserInfoCMD extends CMD implements TabCompleter {
     private final String[] completeList = new String[] {
             "list",
@@ -24,7 +26,8 @@ public class UserInfoCMD extends CMD implements TabCompleter {
             "defence",
             "max_health",
             "info",
-            "manager"
+            "manager",
+            "drop"
     };
     public UserInfoCMD(Sleep plugin) {
         super(plugin);
@@ -39,18 +42,13 @@ public class UserInfoCMD extends CMD implements TabCompleter {
         if (args.length >= 1) {
 
             // list - show all users
-            if (args[0].equals(completeList[0])) {
+            if (args[0].equals("list")) {
                 try {
-                    ResultSet rs = DbDriver.singleton()
-                            .getStatement().executeQuery("select uuid from user;");
+                    ResultSet rs = DbDriver.singleton().getStatement().executeQuery("select uuid from user;");
                     while (rs.next()) {
-                        @Nullable
-                        String mcid = Bukkit.getOfflinePlayer(rs.getString("uuid")).getName();
-                        sender.sendMessage(
-                                String.format("%s: %s",
-                                rs.getString("uuid"),
-                                Objects.requireNonNullElse(mcid, "*Unknown*")
-                                ));
+                        UUID uuid = UUID.fromString(rs.getString("uuid"));
+                        OfflinePlayer result = getOfflinePlayer(uuid);
+                        sender.sendMessage(Objects.requireNonNull(result.getName()));
                     }
                 } catch(SQLException e) {
                     Sleep.logger.info(e.getMessage());
@@ -58,7 +56,7 @@ public class UserInfoCMD extends CMD implements TabCompleter {
             }
 
             // strength
-            else if (args[0].equals(completeList[1])) {
+            else if (args[0].equals("strength")) {
                 if (args.length >= 2 && sender instanceof Player p) {
                     float strength = Float.parseFloat(args[1]);
                     String uuid = p.getUniqueId().toString();
@@ -67,7 +65,7 @@ public class UserInfoCMD extends CMD implements TabCompleter {
             }
 
             // defence
-            else if (args[0].equals(completeList[2])) {
+            else if (args[0].equals("defence")) {
                 if (args.length >= 2 && sender instanceof Player p) {
                     float defence = Float.parseFloat(args[1]);
                     String uuid = p.getUniqueId().toString();
@@ -75,8 +73,8 @@ public class UserInfoCMD extends CMD implements TabCompleter {
                 }
             }
 
-            // max health
-            else if (args[0].equals(completeList[3])) {
+            // max_health
+            else if (args[0].equals("max_health")) {
                 if (args.length >= 2 && sender instanceof Player p) {
                     float max_health = Float.parseFloat(args[1]);
                     String uuid = p.getUniqueId().toString();
@@ -85,7 +83,7 @@ public class UserInfoCMD extends CMD implements TabCompleter {
             }
 
             // info - show info
-            else if (args[0].equals(completeList[4])) {
+            else if (args[0].equals("info")) {
                 UserInfo info;
                 if (args.length >= 2)
                     info = Sleep.userManager.getInfo(args[1]);
@@ -97,10 +95,18 @@ public class UserInfoCMD extends CMD implements TabCompleter {
                 } else {
                     sender.sendMessage("That account is not exist");
                 }
-            } else if (args[0].equals(completeList[5])) {
+            }
+
+            // manager
+            else if (args[0].equals(completeList[5])) {
                 for (UserInfo info : Sleep.userManager.getLoadedUsers()) {
                     sender.sendMessage(info.uuid);
                 }
+            }
+
+            // drop
+            else if (args[0].equals("drop")) {
+                UserInfoDao.getInstance().dropTable();
             }
         }
         return false;

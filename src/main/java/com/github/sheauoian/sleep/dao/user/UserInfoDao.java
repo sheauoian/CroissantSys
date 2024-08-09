@@ -33,6 +33,15 @@ public class UserInfoDao extends Dao {
         }
     }
 
+    public void dropTable() {
+        try {
+            this.statement.execute("DROP TABLE IF EXISTS user");
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        createTable();
+    }
+
     public UserInfo insertAndGet(String uuid) {
         this.insert(uuid);
         return get(uuid);

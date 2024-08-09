@@ -1,8 +1,8 @@
 package com.github.sheauoian.sleep.common.storage;
 
-import com.github.sheauoian.sleep.dao.item.SleepItemDao;
-import com.github.sheauoian.sleep.dao.storage.StorageItemDao;
 import com.github.sheauoian.sleep.common.item.SleepItem;
+import com.github.sheauoian.sleep.common.item.StorageItem;
+import com.github.sheauoian.sleep.dao.storage.StorageItemDao;
 import com.github.sheauoian.sleep.player.OnlineUser;
 import mc.obliviate.inventory.Gui;
 import mc.obliviate.inventory.Icon;
@@ -13,17 +13,41 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.inventory.ItemStack;
 
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+
 public class Storage extends Gui {
-    private final OnlineUser user;
+    // Gui
     private final PaginationManager pagination = new PaginationManager(this);
+
+    // Storage Data
+    private final OnlineUser user;
+    private final Map<String, StorageItem> items = new HashMap<>();
+
     public Storage(OnlineUser user) {
-        super(
-                user.player,
-                "storage:"+user.info.uuid,
-                Component.text("Storage"),
-                6);
-        this.user = user;
+        super(user.player, "storage:"+user.info.uuid, Component.text("Storage"), 6);
         pagination.registerPageSlotsBetween(0, 44);
+        this.user = user;
+        for (StorageItem i : StorageItemDao.getInstance().getAll(user.info.uuid)) {
+            user.player.sendMessage(i.getName());
+            user.message(String.format(" - 個数: %d", i.getAmount()));
+            items.put(i.getId(), i);
+        }
+    }
+
+    public Collection<StorageItem> getStorageItems() {
+        return items.values();
+    }
+
+    public int add(String id, int amount) {
+        if (!items.containsKey(id)) {
+            user.message("&6≫ &7新しいアイテムを入手しました &f&l「"+id+"」");
+            items.put(id, new StorageItem(SleepItem.get(id), 0));
+        }
+        int n = items.get(id).add(amount);
+        user.message(" &e[ + "+(amount-n)+"] &7("+n+")");
+        return n;
     }
 
     @Override
@@ -41,19 +65,22 @@ public class Storage extends Gui {
 
     private void calculateProducts() {
         pagination.getItems().clear();
-        for (SleepItem loopItem : SleepItemDao.getInstance().getAll()) {
-            pagination.addItem(new Icon(loopItem.getItemStack()).setAmount(
-                    (int)Math.max(1, StorageItemDao.getInstance().get(
-                            user.player.getUniqueId().toString(),
-                            loopItem.getId()).amount
-                    )).onClick((InventoryClickEvent e) -> {
-                        user.player.sendMessage(loopItem.getId());
-            }));
+        for (StorageItem i : items.values()) {
+            if (i.getAmount() < 1) continue;
+            Icon icon = i.getIcon().onClick((InventoryClickEvent e) -> {
+                        if (!i.getCategory().isCollective) return;
+                        int g = i.remove(64);
+                        ItemStack item = i.getItemStack();
+                        item.setAmount(64 - g);
+                        user.player.getInventory().addItem(item);
+                        calculateAndUpdatePagination();
+                    });
+            pagination.addItem(icon);
         }
     }
 
     private void calculateAndUpdatePagination() {
-        calculateProducts();
+        this.calculateProducts();
         pagination.update();
     }
 }
