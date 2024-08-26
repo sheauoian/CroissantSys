@@ -1,6 +1,6 @@
-name: Sleep
+name: CroissantSys
 version: '${version}'
-main: com.github.sheauoian.sleep.Sleep
+main: com.github.sheauoian.croissantsys.CroissantSys
 api-version: '1.20'
 
 depend:
@@ -11,8 +11,8 @@ depend:
     - DecentHolograms
 
 commands:
-    sleep:
-        description: Sleep のメインコマンドです
+    croissant:
+        description: CroissantSys のメインコマンドです
     item:
         description: Sleep Item を統括します
     user:
@@ -23,3 +23,5 @@ commands:
         description: WarpPoint を統括します
     warp:
         description: Warp します
+    equipment:
+        description: Equipment

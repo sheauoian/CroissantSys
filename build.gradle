@@ -49,7 +49,7 @@ dependencies {
     // Simple HologramAPI (Text Display)
     implementation("com.github.MaximFiedler:HologramAPI:1.1.4")
     // Decent Holograms
-    compileOnly("com.github.decentsoftware-eu:decentholograms:2.8.9")
+    compileOnly("com.github.decentsoftware-eu:decentholograms:2.8.11")
     //
     implementation("com.github.hamza-cskn.obliviate-invs:core:4.3.0")
     implementation("com.github.hamza-cskn.obliviate-invs:configurablegui:4.3.0")
