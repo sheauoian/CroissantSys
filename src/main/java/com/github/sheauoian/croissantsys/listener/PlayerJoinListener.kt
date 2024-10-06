@@ -1,34 +1,36 @@
-package com.github.sheauoian.croissantsys.listener;
+package com.github.sheauoian.croissantsys.listener
 
-import com.github.sheauoian.croissantsys.common.user.UserManager;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TextComponent;
-import net.kyori.adventure.text.minimessage.MiniMessage;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerQuitEvent;
-import org.bukkit.event.server.ServerListPingEvent;
+import com.github.sheauoian.croissantsys.CroissantSys
+import com.github.sheauoian.croissantsys.user.UserData
+import net.kyori.adventure.text.minimessage.MiniMessage
+import org.bukkit.event.EventHandler
+import org.bukkit.event.Listener
+import org.bukkit.event.player.PlayerJoinEvent
+import org.bukkit.event.player.PlayerQuitEvent
+import org.bukkit.event.player.PlayerRespawnEvent
+import org.bukkit.event.server.ServerListPingEvent
 
-public class PlayerJoinListener implements Listener {
+class PlayerJoinListener : Listener {
     @EventHandler
-    public void onPlayerJoin(PlayerJoinEvent e) {
-        TextComponent hello = (TextComponent) e.getPlayer().displayName().append(
-                Component.text(" Joined the game! おやすみなさい")
-        );
-        e.joinMessage(hello);
-        UserManager.getInstance().addOnlinePlayer(e.getPlayer());
+    fun onPlayerJoin(e: PlayerJoinEvent) {
+        UserData.addOnline(e.player)
+    }
+    @EventHandler
+    fun onPlayerQuit(e: PlayerQuitEvent) {
+        UserData.getOnline(e.player).save()
     }
 
     @EventHandler
-    public void onPlayerQuit(PlayerQuitEvent e) {
-        UserManager.getInstance().remove(e.getPlayer().getUniqueId().toString());
+    fun onRespawn(e: PlayerRespawnEvent) {
+        e.respawnLocation = CroissantSys.instance.initialSpawnPoint
     }
 
+
     @EventHandler
-    public void countDown(final ServerListPingEvent e) {
-        String input = "<gradient:#7755BA:#AA5591><bold>CROISSANT WORLD</bold></gradient> ❚ <color:#AAAAAA>Original RPG Server</color>";
-        Component comp = MiniMessage.miniMessage().deserialize(input);
-        e.motd(comp);
+    fun onServerPing(e: ServerListPingEvent) {
+        e.motd(
+            MiniMessage.miniMessage()
+                .deserialize("<gradient:#7755BA:#AA5591><bold>CROISSANT WORLD</bold></gradient> ❚ <color:#AAAAAA>Original RPG Server</color>")
+        )
     }
 }

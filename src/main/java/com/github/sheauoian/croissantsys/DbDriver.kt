@@ -1,37 +1,31 @@
-package com.github.sheauoian.croissantsys;
+package com.github.sheauoian.croissantsys
 
-import org.sqlite.SQLiteConfig;
+import org.sqlite.SQLiteConfig
+import java.sql.Connection
+import java.sql.DriverManager
+import java.sql.SQLException
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-
-import static com.github.sheauoian.croissantsys.CroissantSys.logger;
-
-public class DbDriver {
-    private static final DbDriver instance = new DbDriver();
-    private final Connection con;
-    public DbDriver() {
+open class DbDriver {
+    fun close() {
         try {
-            SQLiteConfig config = new SQLiteConfig();
-            config.setDateStringFormat("yyyy-MM-dd HH:mm:ss");
-            con = DriverManager.getConnection("jdbc:sqlite:database.db", config.toProperties());
-        } catch (Exception e){
-            throw new RuntimeException(e);
+            con.close()
+        } catch (e: SQLException) {
+            throw RuntimeException(e)
         }
     }
-    public static DbDriver getInstance() {
-        return instance;
-    }
-    public Connection getConnection() {
-        return con;
-    }
 
-    public void close(){
-        try {
-            if (con != null) con.close();
-        } catch (SQLException e) {
-            logger.warning(e.getMessage());
+    companion object {
+        val instance: DbDriver = DbDriver()
+        var con: Connection
+
+        init {
+            try {
+                val config = SQLiteConfig()
+                config.setDateStringFormat("yyyy-MM-dd HH:mm:ss")
+                con = DriverManager.getConnection("jdbc:sqlite:database.db", config.toProperties())
+            } catch (e: Exception) {
+                throw RuntimeException(e)
+            }
         }
     }
 }

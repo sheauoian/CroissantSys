@@ -12,7 +12,9 @@ depend:
 
 commands:
     croissant:
-        description: CroissantSys のメインコマンドです
+        permission: croissant.op
+        aliases: croi
+        description: Croissant System のメインコマンドです。
     item:
         description: Sleep Item を統括します
     user:
