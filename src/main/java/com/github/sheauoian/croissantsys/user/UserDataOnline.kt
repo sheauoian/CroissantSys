@@ -2,17 +2,19 @@ package com.github.sheauoian.croissantsys.user
 
 import com.github.sheauoian.croissantsys.user.ui.MainMenu
 import com.github.sheauoian.croissantsys.pve.DamageLayer
-import com.github.sheauoian.croissantsys.user.ui.WarpUI
+import com.github.sheauoian.croissantsys.user.ui.StatusGui
 import net.kyori.adventure.text.Component
 import org.bukkit.attribute.Attribute
 import org.bukkit.entity.Player
 
 class UserDataOnline(val player: Player): UserData(player.uniqueId), DamageLayer {
-    private val menu: MainMenu = MainMenu(this)
-    val warp: WarpUI = WarpUI(this)
-
     fun openMenu() {
-        menu.open()
+        MainMenu(this).open()
+    }
+
+    // Status
+    fun openStatusMenu() {
+        StatusGui(this).show(player)
     }
 
     fun update() {

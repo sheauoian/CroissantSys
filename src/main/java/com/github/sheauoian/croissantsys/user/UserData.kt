@@ -38,7 +38,7 @@ open class UserData(val uuid: UUID): DbDriver() {
                 CREATE TABLE IF NOT EXISTS wearings(
                     user_uuid           TEXT        NOT NULL,
                     body_part           INT         DEFAULT 0,
-                    equipment_id        TEXT        NOT NULL,
+                    equipment_id        INT         NOT NULL,
                     UNIQUE(user_uuid, body_part)
                 )
             """.trimIndent())
@@ -139,24 +139,25 @@ open class UserData(val uuid: UUID): DbDriver() {
         for ((bodyPart, equipment) in wearing) {
             if (equipment != null) {
                 saveWearingsStm.setString(1, uuid.toString())
-                saveWearingsStm.setString(2, bodyPart.name)
+                saveWearingsStm.setInt(2, bodyPart.ordinal)
                 saveWearingsStm.setString(3, equipment.uniqueId)
                 saveWearingsStm.execute()
                 equipment.save()
             }
             else {
                 deleteWearingStm.setString(1, uuid.toString())
-                deleteWearingStm.setString(2, bodyPart.name)
+                deleteWearingStm.setInt(2, bodyPart.ordinal)
                 deleteWearingStm.execute()
             }
         }
     }
 
-    fun setWearing(bodyPart: BodyPart, equipment: Equipment) {
+
+    // Wearing
+    fun setWearing(bodyPart: BodyPart, equipment: Equipment): Boolean {
+        if (equipment.equipmentData.bodyPart != bodyPart) return false
         wearing[bodyPart] = equipment
-        if (this is UserDataOnline) {
-            player.sendMessage("装備が良い具合に設定出来たかも ${bodyPart}, ${wearing[bodyPart] ?: "none"}")
-        }
+        return true
     }
 
     fun clearWearing() {
@@ -168,12 +169,14 @@ open class UserData(val uuid: UUID): DbDriver() {
         BodyPart.entries.forEach {
             var comp = Component.text("${it.name}: ")
             val equipment = wearing[it]
-            if (equipment != null) comp = comp.append(equipment.getComponent())
-            else comp = comp.append(Component.text("[ NONE ]"))
+            comp =
+                if  (equipment != null)   comp.append(equipment.getComponent())
+                else                      comp.append(Component.text("[ NONE ]"))
             component = component.append(comp.appendNewline())
         }
         return component
     }
+
 
     fun canBuy(required: Int): Boolean {
         return money >= required

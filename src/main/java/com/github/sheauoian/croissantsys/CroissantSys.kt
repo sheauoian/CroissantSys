@@ -1,14 +1,20 @@
 package com.github.sheauoian.croissantsys
 
 import com.github.sheauoian.croissantsys.command.*
+import com.github.sheauoian.croissantsys.command.argument.EDataArgument
 import com.github.sheauoian.croissantsys.listener.PlayerJoinListener
 import com.github.sheauoian.croissantsys.pve.EquipmentData
 import com.github.sheauoian.croissantsys.user.UserData
 import com.github.sheauoian.croissantsys.user.UserRunnable
+import dev.rollczi.litecommands.LiteCommands
+import dev.rollczi.litecommands.adventure.LiteAdventureExtension
+import dev.rollczi.litecommands.bukkit.LiteBukkitFactory
 import mc.obliviate.inventory.InventoryAPI
 import org.bukkit.Bukkit
 import org.bukkit.Location
+import org.bukkit.command.CommandSender
 import org.bukkit.plugin.java.JavaPlugin
+
 
 class CroissantSys: JavaPlugin() {
     companion object {
@@ -29,9 +35,23 @@ class CroissantSys: JavaPlugin() {
         }
     }
 
+    var liteCommands: LiteCommands<CommandSender>? = null
+
     override fun onEnable() {
         instance = this
 
+        this.liteCommands = LiteBukkitFactory.builder("croi", this)
+            .extension(LiteAdventureExtension()) { config ->
+                config.miniMessage(true)
+            }
+            .commands(
+                EquipmentCommand(),
+                WearingCommand()
+            )
+            .argument(
+                EquipmentData::class.java, EDataArgument()
+            )
+            .build()
         // Depends
         InventoryAPI(this).init()
 
@@ -43,6 +63,7 @@ class CroissantSys: JavaPlugin() {
     override fun onDisable() {
         saveConfig()
         UserData.save()
+        EquipmentData.save()
 
         DbDriver.instance.close()
     }

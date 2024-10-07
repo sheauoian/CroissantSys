@@ -27,3 +27,5 @@ commands:
         description: Warp します
     equipment:
         description: Equipment
+    menu:
+        description: メニュー開きます

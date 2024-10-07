@@ -12,7 +12,8 @@ abstract class Cmd : CommandExecutor {
             val commands = listOf(
                 CroissantCmd(),
                 UserDataCmd(),
-                EquipmentCmd()
+                //EquipmentCmd(),
+                MenuCmd()
             )
             commands.forEach {
                 it.register(p)

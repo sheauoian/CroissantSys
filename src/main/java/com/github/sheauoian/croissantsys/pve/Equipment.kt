@@ -2,10 +2,11 @@ package com.github.sheauoian.croissantsys.pve
 
 import com.github.sheauoian.croissantsys.DbDriver
 import net.kyori.adventure.text.Component
+import org.bukkit.inventory.ItemStack
 import java.sql.PreparedStatement
 import java.util.*
 
-class Equipment(val uniqueId: String, private val equipmentData: EquipmentData): DbDriver() {
+class Equipment(val uniqueId: String, val equipmentData: EquipmentData): DbDriver() {
     companion object {
         // SQL
         private var loadStm: PreparedStatement
@@ -14,7 +15,7 @@ class Equipment(val uniqueId: String, private val equipmentData: EquipmentData):
         init {
             con.createStatement().execute("""
                 CREATE TABLE IF NOT EXISTS equipments(
-                    id              STRING      PRIMARY KEY,
+                    id              INT         PRIMARY KEY,
                     data_id         STRING      NOT NULL,
                     user_uuid       STRING      NOT NULL
                 )
@@ -64,9 +65,19 @@ class Equipment(val uniqueId: String, private val equipmentData: EquipmentData):
 
     }
 
+    val item: ItemStack
+        get() {
+            val item = equipmentData.item
+            val meta = item.itemMeta
+            val lore: MutableList<Component> = listOf(Component.text(equipmentData.bodyPart.name)).toMutableList()
+            meta.lore(lore)
+            item.setItemMeta(meta)
+            return item
+        }
+
 
     fun getComponent(): Component {
-        return Component.text("${equipmentData.name} [${uniqueId}]")
+        return equipmentData.name.append(Component.text(" [${uniqueId}]"))
     }
 
     override fun toString(): String {
