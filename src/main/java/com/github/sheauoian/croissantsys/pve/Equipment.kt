@@ -1,86 +1,158 @@
 package com.github.sheauoian.croissantsys.pve
 
 import com.github.sheauoian.croissantsys.DbDriver
+import com.github.sheauoian.croissantsys.util.BodyPart
+import com.github.sheauoian.croissantsys.util.status.Status
+import com.github.sheauoian.croissantsys.util.status.StatusType
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.format.TextDecoration
+import net.kyori.adventure.text.minimessage.MiniMessage
 import org.bukkit.inventory.ItemStack
 import java.sql.PreparedStatement
-import java.util.*
 
-class Equipment(val uniqueId: String, val equipmentData: EquipmentData): DbDriver() {
+class Equipment(
+    val id: Int,
+    val data: EquipmentData,
+    var level: Int,
+    private var subStatus: List<Status>
+) : DbDriver() {
+    constructor(id: Int, data: EquipmentData, level: Int, subStatusStr: String):
+            this(id, data, level, Json.decodeFromString<List<Status>>(subStatusStr))
+
     companion object {
         // SQL
         private var loadStm: PreparedStatement
         private var insertStm: PreparedStatement
         private var loadUserEquipmentsStm: PreparedStatement
+        private var saveStm: PreparedStatement
         init {
             con.createStatement().execute("""
                 CREATE TABLE IF NOT EXISTS equipments(
-                    id              INT         PRIMARY KEY,
+                    id              INTEGER     PRIMARY KEY,
                     data_id         STRING      NOT NULL,
-                    user_uuid       STRING      NOT NULL
+                    user_uuid       STRING      NOT NULL,
+                    level           INTEGER     DEFAULT 0,
+                    sub_status      STRING
                 )
             """.trimIndent())
 
             loadStm = con.prepareStatement("""
-                SELECT data_id, user_uuid FROM equipments WHERE id = ?
+                SELECT data_id, level, sub_status FROM equipments WHERE id = ?
             """.trimIndent())
 
             insertStm = con.prepareStatement("""
                 INSERT INTO 
-                    equipments  (id, data_id, user_uuid) 
-                    VALUES      (?, ?, ?)
+                    equipments  (data_id, user_uuid, sub_status) 
+                    VALUES      (?, ?, ?);
+                SELECT last_insert_rowid();
             """.trimIndent())
 
             loadUserEquipmentsStm = con.prepareStatement("""
-                SELECT id, data_id FROM equipments WHERE user_uuid = ?
+                SELECT id, data_id, level, sub_status FROM equipments WHERE user_uuid = ?
+            """.trimIndent())
+
+            saveStm = con.prepareStatement("""
+                UPDATE equipments SET level = ?, sub_status = ? WHERE id = ?
             """.trimIndent())
         }
 
-        fun load(id: String): Equipment? {
-            loadStm.setString(1, id)
+        fun load(id: Int): Equipment? {
+            loadStm.setInt(1, id)
             val rs = loadStm.executeQuery()
             if (rs.next()) {
-                val dataId = rs.getString(1)
-                val data = EquipmentData.get(dataId)
-                if (data != null) return Equipment(id, data)
+                val data = EquipmentData.get(rs.getString(1)) ?: return null
+                val level = rs.getInt(2)
+                val subStatus: List<Status> = try {
+                    Json.decodeFromString<List<Status>>(rs.getString(3))
+                } catch (e: Exception) {
+                    listOf()
+                }
+                return Equipment(id, data, level, subStatus)
             }
             return null
         }
 
-        private const val NUMBER_OF_UID_DIGITS = 9
         fun generate(data: EquipmentData, userUuid: String): Equipment {
-            var m = 1; for (i in 0..NUMBER_OF_UID_DIGITS) { m *= 10 }
-            val id = Random().nextInt(m).toString().padStart(NUMBER_OF_UID_DIGITS, '0')
+            insertStm.setString(1, data.id)
+            insertStm.setString(2, userUuid)
+            insertStm.setString(3, Json.encodeToString(Status(100.0, StatusType.STR)))
+            insertStm.executeUpdate()
+            val rs = insertStm.generatedKeys ; rs.next() ; val id = rs.getInt(1)
+            return Equipment(id, data, 0, listOf())
+        }
 
-            insertStm.setString(1, id)
-            insertStm.setString(2, data.id)
-            insertStm.setString(3, userUuid)
-            insertStm.execute()
+        fun loadUserEquipments(uuid: String): List<Equipment> {
+            return loadUserEquipments(uuid, null)
+        }
 
-            return Equipment(id, data)
+        fun loadUserEquipments(uuid: String, bodyPart: BodyPart?): List<Equipment> {
+            loadUserEquipmentsStm.setString(1, uuid)
+            val rs = loadUserEquipmentsStm.executeQuery()
+            val list: MutableList<Equipment> = ArrayList()
+            while (rs.next()) {
+                if (bodyPart == null ||
+                    bodyPart == EquipmentData.get(rs.getString(2))?.bodyPart) {
+                    val data = EquipmentData.get(rs.getString(2)) ?: continue
+                    list.add(Equipment(
+                        rs.getInt(1),
+                        data,
+                        rs.getInt(3),
+                        rs.getString(4) ?: "[]"
+                    ))
+                }
+            }
+            return list
         }
     }
 
     fun save() {
-
+        saveStm.setInt(1, level)
+        saveStm.setString(2, Json.encodeToString(subStatus))
+        saveStm.setInt(3, id)
+        saveStm.execute()
     }
 
     val item: ItemStack
         get() {
-            val item = equipmentData.item
+            val item = data.item
             val meta = item.itemMeta
-            val lore: MutableList<Component> = listOf(Component.text(equipmentData.bodyPart.name)).toMutableList()
+            val name = meta.displayName() ?: data.name
+            if (level >= 1)
+                meta.displayName(name.append(MiniMessage.miniMessage().deserialize("<color:#cfaadd> +$level")))
+            val lore: MutableList<Component> = listOf(
+                Component.text("${data.mainStatus.type.displayName} : ${data.mainStatus.getVolumeFromLevel(level)}")
+            ).toMutableList()
+            lore.add(MiniMessage.miniMessage()
+                .deserialize("<color:#bbbbaa>[ ${data.bodyPart.name} ]")
+                .decoration(TextDecoration.ITALIC, false))
+            lore.add(MiniMessage.miniMessage()
+                .deserialize("<color:#bbbbaa>ID: $id")
+                .decoration(TextDecoration.ITALIC, false))
+            subStatus.forEach {
+                lore.add(Component.text("[sub] ${it.type}, ${it.volume}"))
+            }
             meta.lore(lore)
             item.setItemMeta(meta)
             return item
         }
 
+    fun levelUp() {
+        level += 1
+    }
+
+    fun addSubStatus(status: Status) {
+        val list = subStatus.toMutableList()
+        list.add(status)
+        subStatus = list
+    }
 
     fun getComponent(): Component {
-        return equipmentData.name.append(Component.text(" [${uniqueId}]"))
+        return data.name.append(Component.text(" [unique_id=${id}, level=$level]"))
     }
 
     override fun toString(): String {
-        return "Equipment{UniqueId: ${uniqueId}, EquipmentId: ${equipmentData.id}}"
+        return "Equipment{UniqueId: ${id}, EquipmentId: ${data.id}}"
     }
 }

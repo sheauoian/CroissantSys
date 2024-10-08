@@ -1,20 +1,41 @@
 package com.github.sheauoian.croissantsys.command
 
+import com.github.sheauoian.croissantsys.CroissantSys
 import com.github.sheauoian.croissantsys.user.UserData
-import org.bukkit.command.Command
+import com.github.sheauoian.croissantsys.util.BodyPart
+import dev.rollczi.litecommands.annotations.argument.Arg
+import dev.rollczi.litecommands.annotations.command.RootCommand
+import dev.rollczi.litecommands.annotations.context.Context
+import dev.rollczi.litecommands.annotations.execute.Execute
+import dev.rollczi.litecommands.annotations.optional.OptionalArg
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 
-class MenuCmd: Cmd() {
-    override val commandName: String
-        get() = "menu"
+@RootCommand
+class MenuCmd {
+    @Execute(name = "menu")
+    fun menu(@Context sender: Player) {
+        UserData.getOnline(sender)?.openMenu()
+    }
 
-    override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
-        if (sender is Player) {
-            UserData.getOnline(sender).openMenu()
-        } else {
-            sender.sendMessage("このコマンドは Player のみ実行可能です。")
+    @Execute(name = "equipment_storage", aliases = ["es"])
+    fun eStorage(@Context sender: Player, @OptionalArg bodyPart: BodyPart?) {
+        UserData.getOnline(sender)?.openEStorage(bodyPart)
+    }
+
+    @Execute(name = "spawn")
+    fun spawn(@Context sender: Player) {
+        sender.teleport(CroissantSys.instance.initialSpawnPoint)
+    }
+
+    @Execute(name = "userinfo")
+    fun userInfo(@Context sender: CommandSender, @Arg mcid: String) {
+        val user = UserData.get(CroissantSys.instance.server.getOfflinePlayer(mcid).uniqueId)
+        if (user == null) {
+            sender.sendMessage("そのアカウントは存在しません")
         }
-        return false
+        else {
+            sender.sendMessage(user.getWearingComponent())
+        }
     }
 }

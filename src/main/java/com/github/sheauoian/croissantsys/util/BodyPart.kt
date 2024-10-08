@@ -1,5 +1,6 @@
 package com.github.sheauoian.croissantsys.util
 
+import net.kyori.adventure.text.format.TextDecoration
 import net.kyori.adventure.text.minimessage.MiniMessage
 import org.bukkit.Material
 import org.bukkit.inventory.ItemStack
@@ -16,7 +17,7 @@ enum class BodyPart(val material: Material, val x: Int, val y: Int) {
         val item = ItemStack(material)
         val meta = item.itemMeta
         meta.displayName(MiniMessage.miniMessage()
-            .deserialize("<color:#aaaaaa>[ 空のスロット ]"))
+            .deserialize("<color:#aaaaaa>[ 空のスロット ]").decoration(TextDecoration.ITALIC, false))
         item.setItemMeta(meta)
         return item
     }

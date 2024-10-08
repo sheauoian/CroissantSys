@@ -20,33 +20,22 @@ class CroissantSys: JavaPlugin() {
     companion object {
         // Singleton
         lateinit var instance: CroissantSys
-
-        fun load() {
-            instance.let {
-                Cmd.load(it)
-
-                val manager = Bukkit.getPluginManager()
-                manager.registerEvents(PlayerJoinListener(), it)
-
-                EquipmentData.reload()
-
-                UserRunnable().runTaskTimer(it, 5, 2)
-            }
-        }
     }
 
-    var liteCommands: LiteCommands<CommandSender>? = null
+    private var liteCommands: LiteCommands<CommandSender>? = null
 
     override fun onEnable() {
         instance = this
+        saveDefaultConfig()
 
-        this.liteCommands = LiteBukkitFactory.builder("croi", this)
+        this.liteCommands = LiteBukkitFactory.builder("croissant", this)
             .extension(LiteAdventureExtension()) { config ->
                 config.miniMessage(true)
             }
             .commands(
                 EquipmentCommand(),
-                WearingCommand()
+                WearingCommand(),
+                MenuCmd()
             )
             .argument(
                 EquipmentData::class.java, EDataArgument()
@@ -55,9 +44,10 @@ class CroissantSys: JavaPlugin() {
         // Depends
         InventoryAPI(this).init()
 
-        saveDefaultConfig()
-
-        load()
+        val manager = Bukkit.getPluginManager()
+        manager.registerEvents(PlayerJoinListener(), this)
+        EquipmentData.reload()
+        UserRunnable().runTaskTimer(this, 5, 2)
     }
 
     override fun onDisable() {

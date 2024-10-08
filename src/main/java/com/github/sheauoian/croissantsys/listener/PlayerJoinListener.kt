@@ -17,14 +17,13 @@ class PlayerJoinListener : Listener {
     }
     @EventHandler
     fun onPlayerQuit(e: PlayerQuitEvent) {
-        UserData.getOnline(e.player).save()
+        UserData.getOnline(e.player)?.saveAndUnload()
     }
 
     @EventHandler
     fun onRespawn(e: PlayerRespawnEvent) {
         e.respawnLocation = CroissantSys.instance.initialSpawnPoint
     }
-
 
     @EventHandler
     fun onServerPing(e: ServerListPingEvent) {

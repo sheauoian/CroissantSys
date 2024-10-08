@@ -6,7 +6,7 @@ import org.bukkit.scheduler.BukkitRunnable
 class UserRunnable: BukkitRunnable() {
     override fun run() {
         CroissantSys.instance.server.onlinePlayers.forEach {
-            UserData.getOnline(it).update()
+            UserData.getOnline(it)?.update()
         }
     }
 }

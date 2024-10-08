@@ -26,8 +26,10 @@ class StatusGui(private val user: UserDataOnline): ChestGui(6, ComponentHolder.o
 
         BodyPart.entries.forEach {
             val item = user.wearing[it]?.item ?: it.empty()
-            equipmentPane.addItem(GuiItem(item) { event ->
-                event.whoClicked.sendMessage(it.name) },
+            equipmentPane.addItem(GuiItem(item)
+            { _ ->
+                user.openEStorage(it)
+            },
                 it.x, it.y)
         }
 

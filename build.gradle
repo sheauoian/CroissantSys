@@ -3,6 +3,7 @@ plugins {
     id("xyz.jpenilla.run-paper") version "2.2.3"
     id("com.gradleup.shadow") version "8.3.1"
     id("org.jetbrains.kotlin.jvm")
+    id("org.jetbrains.kotlin.plugin.serialization") version '2.0.20'
 }
 
 group = 'com.github.sheauoian'
@@ -70,6 +71,12 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
     // IF (GUI Manager)
     implementation("com.github.stefvanschie.inventoryframework:IF:0.10.17")
+    // https://mvnrepository.com/artifact/org.json/json
+    implementation("org.json:json:20240303")
+
+    // Kotlin Serializer
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
+
 
     // Lite Commands
     implementation("dev.rollczi:litecommands-bukkit:3.6.1")

@@ -6,7 +6,9 @@ import com.github.sheauoian.croissantsys.pve.Equipment
 import com.github.sheauoian.croissantsys.util.BodyPart
 import net.kyori.adventure.text.Component
 import org.bukkit.Bukkit
+import org.bukkit.configuration.file.YamlConfiguration
 import org.bukkit.entity.Player
+import java.io.File
 import java.sql.PreparedStatement
 import java.util.*
 
@@ -20,26 +22,14 @@ open class UserData(val uuid: UUID): DbDriver() {
         // SQL
         var loadStm: PreparedStatement
         var saveStm: PreparedStatement
-        var loadWearingsStm: PreparedStatement
-        var saveWearingsStm: PreparedStatement
-        var deleteWearingStm: PreparedStatement
 
         init {
             con.createStatement().execute("""
                 CREATE TABLE IF NOT EXISTS users(
                     uuid        TEXT        PRIMARY KEY,
-                    money       INT         DEFAULT $DEFAULT_MONEY,
+                    money       INTEGER     DEFAULT $DEFAULT_MONEY,
                     health      REAL        DEFAULT $DEFAULT_HEALTH,
                     max_health  REAL        DEFAULT $DEFAULT_MAX_HEALTH
-                )
-            """.trimIndent())
-
-            con.createStatement().execute("""
-                CREATE TABLE IF NOT EXISTS wearings(
-                    user_uuid           TEXT        NOT NULL,
-                    body_part           INT         DEFAULT 0,
-                    equipment_id        INT         NOT NULL,
-                    UNIQUE(user_uuid, body_part)
                 )
             """.trimIndent())
 
@@ -57,23 +47,6 @@ open class UserData(val uuid: UUID): DbDriver() {
                         health=excluded.health,
                         max_health=excluded.max_health
                 """.trimIndent())
-
-            loadWearingsStm = con.prepareStatement("""
-                SELECT body_part, equipment_id FROM wearings WHERE user_uuid = ?
-                """.trimIndent())
-
-            saveWearingsStm = con.prepareStatement("""
-                INSERT INTO 
-                    wearings    (user_uuid, body_part, equipment_id) 
-                    VALUES      (?, ?, ?)
-                ON CONFLICT(user_uuid, body_part)
-                    DO UPDATE SET 
-                        equipment_id=excluded.equipment_id
-            """.trimIndent())
-
-            deleteWearingStm = con.prepareStatement("""
-                DELETE FROM wearings WHERE user_uuid = ? AND body_part = ?
-            """.trimIndent())
         }
 
         val datum: MutableMap<UUID, UserData> = mutableMapOf()
@@ -91,8 +64,21 @@ open class UserData(val uuid: UUID): DbDriver() {
         fun addOffline(uuid: UUID) {
             datum[uuid] = UserData(uuid)
         }
-        fun getOnline(player: Player): UserDataOnline {
-            return datum[player.uniqueId] as UserDataOnline
+
+        fun get(uuid: UUID): UserData? {
+            if (datum.containsKey(uuid)) return datum[uuid]
+            add(uuid)
+            if (datum.containsKey(uuid)) return datum[uuid]
+            return null
+        }
+
+        fun getOnline(player: Player): UserDataOnline? {
+            if (datum.containsKey(player.uniqueId)) return datum[player.uniqueId] as UserDataOnline
+            return null
+        }
+
+        fun getLoadedAll(): List<UserData> {
+            return datum.values.toList()
         }
 
         fun save() {
@@ -119,45 +105,54 @@ open class UserData(val uuid: UUID): DbDriver() {
             health = rs.getDouble("health")
             maxHealth = rs.getDouble("max_health")
         }
-
-        loadWearingsStm.setString(1, uuid.toString())
-        val wearingRs = loadWearingsStm.executeQuery()
-        while (wearingRs.next()) {
-            val bodyPart = BodyPart.entries[wearingRs.getInt(1)]
-            val equipment = Equipment.load(wearingRs.getString(2))
-            wearing[bodyPart] = equipment
+        val f = File(CroissantSys.instance.dataFolder, "userdata.yml")
+        val c = YamlConfiguration.loadConfiguration(f)
+        BodyPart.entries.forEach {
+            wearing[it] = Equipment.load(c.getInt("$uuid.wearing.${it.name}"))
         }
     }
-
+    fun reloadWearing() {
+        BodyPart.entries.forEach {
+            if (wearing[it] != null)
+                wearing[it] = Equipment.load(wearing[it]!!.id)
+        }
+    }
+    fun saveAndUnload() {
+        save()
+        datum.remove(uuid)
+    }
     fun save() {
         saveStm.setString(1, uuid.toString())
         saveStm.setInt(2, money)
         saveStm.setDouble(3, health)
         saveStm.setDouble(4, maxHealth)
         saveStm.execute()
-
-        for ((bodyPart, equipment) in wearing) {
-            if (equipment != null) {
-                saveWearingsStm.setString(1, uuid.toString())
-                saveWearingsStm.setInt(2, bodyPart.ordinal)
-                saveWearingsStm.setString(3, equipment.uniqueId)
-                saveWearingsStm.execute()
-                equipment.save()
-            }
-            else {
-                deleteWearingStm.setString(1, uuid.toString())
-                deleteWearingStm.setInt(2, bodyPart.ordinal)
-                deleteWearingStm.execute()
-            }
+        saveWearing()
+        if (this is UserDataOnline) {
+            eManager.save()
         }
     }
 
+    private fun saveWearing() {
+        val f = File(CroissantSys.instance.dataFolder, "userdata.yml")
+        val c = YamlConfiguration.loadConfiguration(f)
+
+        for ((bodyPart, equipment) in wearing) {
+            equipment?.save()
+            c.set("$uuid.wearing.${bodyPart.name}", equipment?.id)
+        }
+        c.save(f)
+    }
 
     // Wearing
     fun setWearing(bodyPart: BodyPart, equipment: Equipment): Boolean {
-        if (equipment.equipmentData.bodyPart != bodyPart) return false
+        if (equipment.data.bodyPart != bodyPart) return false
         wearing[bodyPart] = equipment
         return true
+    }
+
+    fun setWearing(equipment: Equipment) {
+        wearing[equipment.data.bodyPart] = equipment
     }
 
     fun clearWearing() {
