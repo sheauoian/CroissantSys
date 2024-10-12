@@ -1,8 +1,8 @@
 package com.github.sheauoian.croissantsys.command
 
-import com.github.sheauoian.croissantsys.pve.Equipment
-import com.github.sheauoian.croissantsys.pve.EquipmentData
-import com.github.sheauoian.croissantsys.user.UserData
+import com.github.sheauoian.croissantsys.pve.equipment.EquipmentManager
+import com.github.sheauoian.croissantsys.pve.equipment.data.EquipmentData
+import com.github.sheauoian.croissantsys.user.UserDataManager
 import com.github.sheauoian.croissantsys.util.BodyPart
 import com.github.sheauoian.croissantsys.util.status.Status
 import com.github.sheauoian.croissantsys.util.status.StatusType
@@ -18,34 +18,34 @@ class WearingCommand {
 
     @Execute
     fun executeWearing(@Arg sender: Player) {
-        val data = UserData.getOnline(sender)?.openStatusMenu()
+        UserDataManager.instance.getOnline(sender)?.openStatusMenu()
     }
 
     @Execute(name = "info")
     fun info(@Context sender: CommandSender, @Arg target: Player) {
-        val user = UserData.getOnline(target)
-        if (user != null) sender.sendMessage(user.getWearingComponent())
+        val user = UserDataManager.instance.getOnline(target)
+        if (user != null) sender.sendMessage(user.wearing.getWearingComponent())
     }
 
     @Execute(name = "set")
     fun info(@Context sender: Player, @Arg bodyPart: BodyPart, @Arg data: EquipmentData) {
-        val user = UserData.getOnline(sender)
-        if (user != null) user.setWearing(bodyPart, Equipment.generate(data, sender.uniqueId.toString()))
+        val user = UserDataManager.instance.getOnline(sender)
+        user?.wearing?.setWearing(bodyPart, EquipmentManager.instance.generate(data, sender.uniqueId.toString()))
     }
 
     @Execute(name = "levelup")
     fun levelup(@Context sender: Player, @Arg bodyPart: BodyPart) {
-        val user = UserData.getOnline(sender)
+        val user = UserDataManager.instance.getOnline(sender)
         if (user != null) {
-            user.levelUpWearing(bodyPart)
+            user.wearing.get(bodyPart)?.levelUp()
         }
     }
 
     @Execute(name = "sub_status")
     fun subStatus(@Context sender: Player, @Arg bodyPart: BodyPart, @Arg volume: Double, @Arg type: StatusType) {
-        val user = UserData.getOnline(sender)
+        val user = UserDataManager.instance.getOnline(sender)
         if (user != null) {
-            user.addSubStatusToWearing(bodyPart, Status(volume, type))
+            user.wearing.get(bodyPart)?.addSubStatus(Status(volume, type))
         }
     }
 }

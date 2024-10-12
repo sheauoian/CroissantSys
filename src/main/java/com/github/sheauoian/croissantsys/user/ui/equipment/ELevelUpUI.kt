@@ -1,7 +1,7 @@
 package com.github.sheauoian.croissantsys.user.ui.equipment
 
-import com.github.sheauoian.croissantsys.pve.Equipment
-import com.github.sheauoian.croissantsys.user.UserDataOnline
+import com.github.sheauoian.croissantsys.pve.equipment.Equipment
+import com.github.sheauoian.croissantsys.user.online.UserDataOnline
 import com.github.stefvanschie.inventoryframework.adventuresupport.ComponentHolder
 import com.github.stefvanschie.inventoryframework.gui.GuiItem
 import com.github.stefvanschie.inventoryframework.gui.type.ChestGui
@@ -41,6 +41,7 @@ class ELevelUpUI(val user: UserDataOnline): ChestGui(6, title){
                         user.openELevelingStorage(null)
                     }
                     else -> {
+                        user.eManager.levelUp(equipment)
                         setEquipment(equipment)
                     }
                 }

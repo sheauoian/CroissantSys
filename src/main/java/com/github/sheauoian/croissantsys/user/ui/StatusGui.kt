@@ -1,6 +1,6 @@
 package com.github.sheauoian.croissantsys.user.ui
 
-import com.github.sheauoian.croissantsys.user.UserDataOnline
+import com.github.sheauoian.croissantsys.user.online.UserDataOnline
 import com.github.sheauoian.croissantsys.util.BodyPart
 import com.github.stefvanschie.inventoryframework.adventuresupport.ComponentHolder
 import com.github.stefvanschie.inventoryframework.gui.GuiItem
@@ -25,7 +25,7 @@ class StatusGui(private val user: UserDataOnline): ChestGui(6, ComponentHolder.o
         val equipmentPane = StaticPane(3, 1, 3, 4)
 
         BodyPart.entries.forEach {
-            val item = user.wearing[it]?.item ?: it.empty()
+            val item = user.wearing.get(it)?.item ?: it.empty()
             equipmentPane.addItem(GuiItem(item)
             { _ ->
                 user.openEStorage(it)

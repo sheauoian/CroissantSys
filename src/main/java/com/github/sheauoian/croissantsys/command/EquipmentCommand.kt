@@ -1,7 +1,7 @@
 package com.github.sheauoian.croissantsys.command
 
-import com.github.sheauoian.croissantsys.pve.EquipmentData
-import com.github.sheauoian.croissantsys.user.UserData
+import com.github.sheauoian.croissantsys.pve.equipment.data.EDataManager
+import com.github.sheauoian.croissantsys.user.UserDataManager
 import com.github.sheauoian.croissantsys.util.BodyPart
 import dev.rollczi.litecommands.annotations.argument.Arg
 import dev.rollczi.litecommands.annotations.command.Command
@@ -23,13 +23,13 @@ class EquipmentCommand {
 
     @Execute(name = "info")
     fun info(@Context sender: Player) {
-        val user = UserData.getOnline(sender)
-        if (user != null) sender.sendMessage(user.getWearingComponent())
+        val user = UserDataManager.instance.getOnline(sender)
+        if (user != null) sender.sendMessage(user.wearing.getWearingComponent())
     }
 
     @Execute(name = "create")
     fun create(@Context sender: CommandSender, @Arg(value = "データID") dataId: String, @OptionalArg bodyPart: BodyPart?) {
-        if (EquipmentData.addInitialData(dataId, bodyPart) != null) {
+        if (EDataManager.instance.addInitialData(dataId, bodyPart) != null) {
             sender.sendMessage("追加に成功しました")
         }
         else {
@@ -40,15 +40,14 @@ class EquipmentCommand {
     @Execute(name = "list")
     fun list(@Context sender: CommandSender) {
         sender.sendMessage("Equipment ID 一覧:")
-        EquipmentData.getAll().forEach {
+        EDataManager.instance.getAll().forEach {
             sender.sendMessage(" - ${it.id} : ${it.name}")
         }
     }
 
     @Execute(name = "reload")
     fun reload(@Context sender: CommandSender) {
-        EquipmentData.reload()
+        EDataManager.instance.reload()
         sender.sendMessage("Equipment Data のリロードが完了しました。")
     }
-
 }

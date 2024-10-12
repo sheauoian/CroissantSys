@@ -2,6 +2,7 @@ package com.github.sheauoian.croissantsys.command
 
 import com.github.sheauoian.croissantsys.CroissantSys
 import com.github.sheauoian.croissantsys.user.UserData
+import com.github.sheauoian.croissantsys.user.UserDataManager
 import com.github.sheauoian.croissantsys.util.BodyPart
 import dev.rollczi.litecommands.annotations.argument.Arg
 import dev.rollczi.litecommands.annotations.command.RootCommand
@@ -15,12 +16,12 @@ import org.bukkit.entity.Player
 class MenuCmd {
     @Execute(name = "menu")
     fun menu(@Context sender: Player) {
-        UserData.getOnline(sender)?.openMenu()
+        UserDataManager.instance.getOnline(sender)?.openMenu()
     }
 
     @Execute(name = "equipment_storage", aliases = ["es"])
     fun eStorage(@Context sender: Player, @OptionalArg bodyPart: BodyPart?) {
-        UserData.getOnline(sender)?.openEStorage(bodyPart)
+        UserDataManager.instance.getOnline(sender)?.openEStorage(bodyPart)
     }
 
     @Execute(name = "spawn")
@@ -30,12 +31,12 @@ class MenuCmd {
 
     @Execute(name = "userinfo")
     fun userInfo(@Context sender: CommandSender, @Arg mcid: String) {
-        val user = UserData.get(CroissantSys.instance.server.getOfflinePlayer(mcid).uniqueId)
+        val user = UserDataManager.instance.get(CroissantSys.instance.server.getOfflinePlayer(mcid).uniqueId)
         if (user == null) {
             sender.sendMessage("そのアカウントは存在しません")
         }
         else {
-            sender.sendMessage(user.getWearingComponent())
+            sender.sendMessage(user.wearing.getWearingComponent())
         }
     }
 }

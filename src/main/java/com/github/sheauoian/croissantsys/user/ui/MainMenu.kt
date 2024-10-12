@@ -1,6 +1,6 @@
 package com.github.sheauoian.croissantsys.user.ui
 
-import com.github.sheauoian.croissantsys.user.UserDataOnline
+import com.github.sheauoian.croissantsys.user.online.UserDataOnline
 import mc.obliviate.inventory.Gui
 import mc.obliviate.inventory.Icon
 import net.kyori.adventure.key.Key

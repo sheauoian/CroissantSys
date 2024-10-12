@@ -1,10 +1,14 @@
 package com.github.sheauoian.croissantsys
 
-import com.github.sheauoian.croissantsys.command.*
+import com.github.sheauoian.croissantsys.command.EquipmentCommand
+import com.github.sheauoian.croissantsys.command.MenuCmd
+import com.github.sheauoian.croissantsys.command.WearingCommand
 import com.github.sheauoian.croissantsys.command.argument.EDataArgument
 import com.github.sheauoian.croissantsys.listener.PlayerJoinListener
-import com.github.sheauoian.croissantsys.pve.EquipmentData
-import com.github.sheauoian.croissantsys.user.UserData
+import com.github.sheauoian.croissantsys.pve.DamageListener
+import com.github.sheauoian.croissantsys.pve.equipment.data.EDataManager
+import com.github.sheauoian.croissantsys.pve.equipment.data.EquipmentData
+import com.github.sheauoian.croissantsys.user.UserDataManager
 import com.github.sheauoian.croissantsys.user.UserRunnable
 import dev.rollczi.litecommands.LiteCommands
 import dev.rollczi.litecommands.adventure.LiteAdventureExtension
@@ -18,7 +22,6 @@ import org.bukkit.plugin.java.JavaPlugin
 
 class CroissantSys: JavaPlugin() {
     companion object {
-        // Singleton
         lateinit var instance: CroissantSys
     }
 
@@ -46,15 +49,15 @@ class CroissantSys: JavaPlugin() {
 
         val manager = Bukkit.getPluginManager()
         manager.registerEvents(PlayerJoinListener(), this)
-        EquipmentData.reload()
+        manager.registerEvents(DamageListener(), this)
+        EDataManager.instance.reload()
         UserRunnable().runTaskTimer(this, 5, 2)
     }
 
     override fun onDisable() {
         saveConfig()
-        UserData.save()
-        EquipmentData.save()
-
+        UserDataManager.instance.saveAll()
+        EDataManager.instance.saveAll()
         DbDriver.instance.close()
     }
 

@@ -1,7 +1,8 @@
 package com.github.sheauoian.croissantsys.user.ui.equipment
 
-import com.github.sheauoian.croissantsys.pve.Equipment
-import com.github.sheauoian.croissantsys.user.UserDataOnline
+import com.github.sheauoian.croissantsys.pve.equipment.Equipment
+import com.github.sheauoian.croissantsys.user.online.UserDataOnline
+import com.github.sheauoian.croissantsys.user.ui.equipment.pane.EStoragePane
 import com.github.sheauoian.croissantsys.util.BodyPart
 import com.github.stefvanschie.inventoryframework.adventuresupport.ComponentHolder
 import com.github.stefvanschie.inventoryframework.gui.GuiItem
@@ -9,34 +10,40 @@ import com.github.stefvanschie.inventoryframework.gui.type.ChestGui
 import com.github.stefvanschie.inventoryframework.pane.OutlinePane
 import com.github.stefvanschie.inventoryframework.pane.PaginatedPane
 import com.github.stefvanschie.inventoryframework.pane.StaticPane
+import io.lumine.mythic.bukkit.utils.menu.ClickAction
 import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.format.TextColor
 import net.kyori.adventure.text.minimessage.MiniMessage
 import org.bukkit.Material
 import org.bukkit.event.inventory.ClickType
 import org.bukkit.inventory.ItemStack
 import java.util.*
 import kotlin.collections.ArrayDeque
+import kotlin.collections.ArrayList
 
-class EStorageUI(
-    val user: UserDataOnline,
-    bodyPart: BodyPart?,
-    private val isLevelUpUi: Boolean
-): ChestGui(6, ComponentHolder.of(MiniMessage.miniMessage().deserialize(
-    "<gradient:#ddcfaa:#cfaadd><b>武器ストレージ</b></gradient>"
-))) {
+private val sortKeys: List<String> = listOf(
+    "入手順",
+    "レベル順",
+    "装備品ID順",
+    "レアリティ順"
+)
+private val title = ComponentHolder.of(MiniMessage.miniMessage().deserialize(
+    "<gradient:#776233:#623377><b>武器ストレージ</b></gradient>"))
+
+
+class EStorageUI(val user: UserDataOnline, var bodyPart: BodyPart?, private val isLevelUpUi: Boolean)
+    : ChestGui(6, title)
+{
     constructor(user: UserDataOnline, bodyPart: BodyPart?): this(user, bodyPart, false)
-    private val collection = user.eManager.getAll(bodyPart)
     private var sortMode = 0
     private var reverse = false
 
-    private val storagePane = PaginatedPane(1, 1, 7, 4)
+    private val storagePane = EStoragePane(user, bodyPart, isLevelUpUi, 1, 1, 7, 4)
     private val pagingPane = StaticPane(0, 5, 9, 1)
 
     init {
         setOnGlobalClick {event -> event.isCancelled = true}
-
         addPane(storagePane)
-        setEquipments()
 
         pagingPane.addItem(GuiItem(ItemStack(Material.PAPER)) {
             if (storagePane.page >= 1) {
@@ -52,81 +59,98 @@ class EStorageUI(
             }
             user.player.sendMessage("add")
         }, 8, 0)
-
-        pagingPane.addItem(sortButton(0, "入手順にソート"), 4, 0)
-        pagingPane.addItem(sortButton(1, "レベル順にソート"), 5, 0)
-        pagingPane.addItem(sortButton(2, "装備品ID順にソート"), 6, 0)
-
         addPane(pagingPane)
+        setButton()
+    }
+
+    private fun setButton() {
+        pagingPane.addItem(sortButton(), 7, 0)
+        pagingPane.addItem(bodyPartButton(), 6, 0)
         update()
     }
 
-    private fun sortButton(mode: Int, name: String): GuiItem {
+    private fun sortItem(name: String): ItemStack {
         val item = ItemStack(Material.ARROW)
         val meta = item.itemMeta
-        meta.displayName(Component.text(name))
+        if (sortMode != 2)
+            if (reverse)
+                meta.displayName(Component.text("「$name」でソート (昇順)"))
+            else
+                meta.displayName(Component.text("「$name」でソート (降順)"))
+        else
+            if (reverse)
+                meta.displayName(Component.text("「$name」でソート (辞書順)"))
+            else
+                meta.displayName(Component.text("「$name」でソート (逆順)"))
         item.setItemMeta(meta)
-        return GuiItem(item) {
-            if (sortMode == mode) {
+        return item
+    }
+
+    private fun sortButton(): GuiItem {
+        return GuiItem(sortItem(sortKeys[sortMode])) {event ->
+            if (event.isLeftClick) {
+                sortMode = (sortMode + 1) % sortKeys.size
+            }
+            else if (event.isRightClick) {
                 reverse = !reverse
+            }
+            else return@GuiItem
+            storagePane.setEquipments(sortMode, reverse)
+            setButton()
+        }
+    }
+
+    private fun bodyPartItem(): ItemStack {
+        val b = bodyPart
+        val item: ItemStack
+        if (b != null) {
+            item = ItemStack(b.material)
+        }
+        else {
+            item = ItemStack(Material.GLASS)
+        }
+        val meta = item.itemMeta
+        meta.displayName(Component.text("パーツによるフィルター"))
+        val lore = ArrayList<Component>()
+        BodyPart.entries.forEach {
+            if (bodyPart == it)
+                lore.add(Component.text(it.name).color(TextColor.color(0xdddd66)))
+            else
+                lore.add(Component.text(it.name).color(TextColor.color(0x989898)))
+        }
+        meta.lore(lore)
+        item.setItemMeta(meta)
+        return item
+    }
+
+    private fun bodyPartButton(): GuiItem {
+        return GuiItem(bodyPartItem()) { event ->
+            val b = bodyPart
+            if ((event.click == ClickType.DROP || event.click == ClickType.CONTROL_DROP) && b != null) {
+                bodyPart = null
+                storagePane.reset(null)
+                setButton()
+                return@GuiItem
+            } else if (b == null) {
+                bodyPart = BodyPart.MainHand
             } else {
-                sortMode = mode
-                reverse = false
-            }
-            setEquipments()
-            update()
-        }
-    }
-
-    private fun setEquipments() {
-        var sorted = when(sortMode) {
-            1 -> collection.sortedBy { -1 * it.level }
-            2 -> collection.sortedBy { it.data.id }
-            else -> collection
-        }
-        if (reverse) sorted = sorted.reversed()
-        storagePane.clear()
-        getItemPane(sorted).forEach {
-            storagePane.addPage(it)
-        }
-    }
-
-
-
-    private fun getItemPane(collection: Collection<Equipment>): List<OutlinePane> {
-        return getItemPane(ArrayDeque(collection))
-    }
-
-    private fun getItemPane(queue: ArrayDeque<Equipment>): List<OutlinePane> {
-        val list = ArrayList<OutlinePane>()
-        var pane = OutlinePane(0, 0, 7, 4)
-        var i = 0
-        while (queue.size >= 1) {
-            if (i >= 28) {
-                list.add(pane)
-                pane = OutlinePane(0, 0, 7, 4)
-                i = 0
-            }
-            val e = queue.removeFirst()
-            pane.addItem(GuiItem(e.item) { event ->
-                if (isLevelUpUi) {
-                    user.openELeveling(e)
-                } else {
-                    when (event.click) {
-                        ClickType.SHIFT_LEFT, ClickType.SHIFT_RIGHT -> {
-                            user.openELeveling(e)
-                        }
-                        else -> {
-                            user.eManager.load(e)
-                            user.setWearing(e)
-                            user.openStatusMenu()
-                        }
-                    }
+                var bodyPartIdx = b.ordinal
+                val size = BodyPart.entries.size
+                if (event.isLeftClick) {
+                    bodyPartIdx -= 1
+                    if (bodyPartIdx < 0)
+                        bodyPartIdx = size - 1
                 }
-            })
-            i ++
+                else if (event.isRightClick) {
+                    bodyPartIdx += 1
+                    if (bodyPartIdx >= size)
+                        bodyPartIdx = 0
+                } else return@GuiItem
+                bodyPart = BodyPart.entries[bodyPartIdx]
+            }
+
+            storagePane.reset(bodyPart)
+            setButton()
         }
-        list.add(pane)
-        return list
     }
 }

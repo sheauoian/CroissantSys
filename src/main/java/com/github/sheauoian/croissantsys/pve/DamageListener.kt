@@ -1,5 +1,6 @@
 package com.github.sheauoian.croissantsys.pve
 
+import com.github.sheauoian.croissantsys.user.UserDataManager
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
@@ -17,7 +18,9 @@ class DamageListener: Listener {
             e.damage = 0.0
         }
         else if (e.damager is Player) {
-
+            UserDataManager.instance.getOnline(e.damager as Player)?.let {
+                e.damage = it.getInflictDamage(e.damage)
+            }
         }
     }
 }

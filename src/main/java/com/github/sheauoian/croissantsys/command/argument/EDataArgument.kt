@@ -1,6 +1,7 @@
 package com.github.sheauoian.croissantsys.command.argument
 
-import com.github.sheauoian.croissantsys.pve.EquipmentData
+import com.github.sheauoian.croissantsys.pve.equipment.data.EDataManager
+import com.github.sheauoian.croissantsys.pve.equipment.data.EquipmentData
 import dev.rollczi.litecommands.argument.Argument
 import dev.rollczi.litecommands.argument.parser.ParseResult
 import dev.rollczi.litecommands.argument.resolver.ArgumentResolver
@@ -15,7 +16,7 @@ class EDataArgument: ArgumentResolver<CommandSender, EquipmentData>() {
         p1: Argument<EquipmentData>,
         p2: String
     ): ParseResult<EquipmentData> {
-        val data = EquipmentData.get(p2) ?: return ParseResult.failure("存在しない Equipment ID です")
+        val data = EDataManager.instance.get(p2) ?: return ParseResult.failure("存在しない Equipment ID です")
         return ParseResult.success(data)
     }
 
@@ -24,6 +25,6 @@ class EDataArgument: ArgumentResolver<CommandSender, EquipmentData>() {
         argument: Argument<EquipmentData>,
         context: SuggestionContext
     ): SuggestionResult {
-        return SuggestionResult.of(EquipmentData.getIds())
+        return SuggestionResult.of(EDataManager.instance.getIds())
     }
 }

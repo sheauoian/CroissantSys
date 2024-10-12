@@ -1,29 +1,25 @@
-package com.github.sheauoian.croissantsys.user
+package com.github.sheauoian.croissantsys.user.online
 
 import com.github.sheauoian.croissantsys.pve.DamageLayer
-import com.github.sheauoian.croissantsys.pve.Equipment
+import com.github.sheauoian.croissantsys.pve.equipment.Equipment
+import com.github.sheauoian.croissantsys.user.UserData
 import com.github.sheauoian.croissantsys.user.ui.MainMenu
 import com.github.sheauoian.croissantsys.user.ui.StatusGui
 import com.github.sheauoian.croissantsys.user.ui.equipment.ELevelUpUI
 import com.github.sheauoian.croissantsys.user.ui.equipment.EStorageUI
 import com.github.sheauoian.croissantsys.util.BodyPart
-import com.github.sheauoian.croissantsys.util.status.Status
+import com.github.sheauoian.croissantsys.util.status.StatusType
 import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.format.TextColor
 import org.bukkit.attribute.Attribute
 import org.bukkit.entity.Player
 
-class UserDataOnline(val player: Player): UserData(player.uniqueId), DamageLayer {
-    val eManager: UserEquipmentManager = UserEquipmentManager(this)
-
-    fun levelUpWearing(bodyPart: BodyPart?) {
-        val equipment = wearing[bodyPart]
-        if (equipment != null) eManager.levelUp(equipment)
-    }
-
-    fun addSubStatusToWearing(bodyPart: BodyPart?, status: Status) {
-        val equipment = wearing[bodyPart]
-        if (equipment != null) eManager.addSubStatus(equipment, status)
-    }
+class UserDataOnline
+    (val player: Player, override val money: Int, override val health: Double, override val maxHealth: Double):
+    UserData(player.uniqueId, money, health, maxHealth),
+    DamageLayer
+{
+    val eManager: EquipmentStorage = EquipmentStorage(this)
 
     fun openMenu() {
         MainMenu(this).open()
@@ -48,19 +44,22 @@ class UserDataOnline(val player: Player): UserData(player.uniqueId), DamageLayer
     }
 
     fun update() {
+        updateStatus()
         val jump = player.getAttribute(Attribute.GENERIC_JUMP_STRENGTH)
         if (jump != null) {
-            jump.baseValue = 1.0
+            jump.baseValue = 0.5
         }
         player.sendActionBar(Component.text("$health / $maxHealth | ${money}\$"))
     }
 
 
-    override fun getReceiveDamage(d: Double): Double {
-        return d
+    override fun getInflictDamage(d: Double): Double {
+        val damage = d * (baseStatus[StatusType.STR] ?: 1.0)
+        player.sendMessage(Component.text(damage).color(TextColor.color(0xccaa88)))
+        return damage
     }
 
-    override fun getInflictDamage(d: Double): Double {
-        return d
+    override fun getReceiveDamage(d: Double): Double {
+        return d / (baseStatus[StatusType.DEF] ?: 1.0)
     }
 }
