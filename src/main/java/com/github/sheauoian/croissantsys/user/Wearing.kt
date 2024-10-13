@@ -35,7 +35,7 @@ class Wearing(private val uuid: String) {
         }
     }
 
-    private fun saveWearing() {
+    fun saveWearing() {
         val f = File(CroissantSys.instance.dataFolder, "userdata.yml")
         val c = YamlConfiguration.loadConfiguration(f)
 

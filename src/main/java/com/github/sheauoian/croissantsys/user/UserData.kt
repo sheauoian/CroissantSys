@@ -18,8 +18,9 @@ open class UserData(
     init {
         updateStatus()
     }
-    fun save() {
+    open fun save() {
         UserDataManager.instance.save(this)
+        wearing.saveWearing()
     }
 
     fun updateStatus() {

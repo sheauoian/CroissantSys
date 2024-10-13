@@ -1,4 +1,4 @@
-package com.github.sheauoian.croissantsys.user.ui
+package com.github.sheauoian.croissantsys.user.online.ui
 
 import com.github.sheauoian.croissantsys.user.online.UserDataOnline
 import com.github.sheauoian.croissantsys.util.BodyPart

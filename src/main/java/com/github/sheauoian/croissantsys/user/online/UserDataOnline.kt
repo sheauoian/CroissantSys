@@ -3,12 +3,14 @@ package com.github.sheauoian.croissantsys.user.online
 import com.github.sheauoian.croissantsys.pve.DamageLayer
 import com.github.sheauoian.croissantsys.pve.equipment.Equipment
 import com.github.sheauoian.croissantsys.user.UserData
-import com.github.sheauoian.croissantsys.user.ui.MainMenu
-import com.github.sheauoian.croissantsys.user.ui.StatusGui
-import com.github.sheauoian.croissantsys.user.ui.equipment.ELevelUpUI
-import com.github.sheauoian.croissantsys.user.ui.equipment.EStorageUI
+import com.github.sheauoian.croissantsys.user.online.ui.CMaterialStorageGui
+import com.github.sheauoian.croissantsys.user.online.ui.MainMenu
+import com.github.sheauoian.croissantsys.user.online.ui.StatusGui
+import com.github.sheauoian.croissantsys.user.online.ui.equipment.ELevelUpUI
+import com.github.sheauoian.croissantsys.user.online.ui.equipment.EStorageUI
 import com.github.sheauoian.croissantsys.util.BodyPart
 import com.github.sheauoian.croissantsys.util.status.StatusType
+import com.github.stefvanschie.inventoryframework.gui.type.util.NamedGui
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.TextColor
 import org.bukkit.attribute.Attribute
@@ -20,9 +22,25 @@ class UserDataOnline
     DamageLayer
 {
     val eManager: EquipmentStorage = EquipmentStorage(this)
+    private val cmStorage: CMaterialStorage = CMaterialStorage(this.uuid.toString())
+
+    override fun save() {
+        super.save()
+        eManager.save()
+        cmStorage.save()
+    }
+
 
     fun openMenu() {
         MainMenu(this).open()
+    }
+
+    fun openGui(gui: NamedGui) {
+        gui.show(player)
+    }
+
+    fun openCMaterialStorage() {
+        CMaterialStorageGui(cmStorage).show(player)
     }
 
     // Status

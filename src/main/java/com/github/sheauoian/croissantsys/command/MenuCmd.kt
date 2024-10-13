@@ -39,4 +39,15 @@ class MenuCmd {
             sender.sendMessage(user.wearing.getWearingComponent())
         }
     }
+
+    @Execute(name = "cm")
+    fun cmStorage(@Context sender: Player) {
+        val user = UserDataManager.instance.getOnline(sender)
+        if (user == null) {
+            sender.sendMessage("そのアカウントは存在しません")
+        }
+        else {
+            user.openCMaterialStorage()
+        }
+    }
 }

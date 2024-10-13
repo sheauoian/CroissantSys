@@ -78,7 +78,21 @@ class UserDataManager: Manager<UUID, UserData>() {
 
 
     fun join(k: Player): UserDataOnline? {
+        val u = datum[k.uniqueId]
+        if (u is UserDataOnline) {
+            return u
+        } else if (u != null) {
+            save(u)
+        }
         return loadOnline(k) ?: insertOnline(k)
+    }
+
+    fun quit(k: Player) {
+        val u = datum[k.uniqueId]
+        if (u != null) {
+            u.save()
+        }
+        datum.remove(k.uniqueId)
     }
 
     override fun load(k: UUID): UserData? {
@@ -135,9 +149,7 @@ class UserDataManager: Manager<UUID, UserData>() {
         saveStm.setDouble(3, v.health)
         saveStm.setDouble(4, v.maxHealth)
         saveStm.execute()
-        if (v is UserDataOnline) {
-            v.eManager.save()
-        }
+        CroissantSys.instance.logger.info("UserData Saved: ${v.uuid}")
     }
 
     fun get(uuid: UUID): UserData? {

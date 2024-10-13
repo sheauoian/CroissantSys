@@ -1,4 +1,4 @@
-package com.github.sheauoian.croissantsys.user.ui.equipment.pane
+package com.github.sheauoian.croissantsys.user.online.ui.equipment.pane
 
 import com.github.sheauoian.croissantsys.pve.equipment.Equipment
 import com.github.sheauoian.croissantsys.user.online.UserDataOnline
