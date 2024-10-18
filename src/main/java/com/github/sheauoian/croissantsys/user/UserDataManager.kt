@@ -55,9 +55,7 @@ class UserDataManager: Manager<UUID, UserData>() {
                 """.trimIndent())
 
         insertStm = con.prepareStatement("""
-                INSERT INTO 
-                    users   (uuid) 
-                    VALUES  (?)
+                INSERT INTO users (uuid) VALUES (?)
         """.trimIndent())
     }
 
@@ -72,10 +70,9 @@ class UserDataManager: Manager<UUID, UserData>() {
 
     private fun insertOnline(k: Player): UserDataOnline? {
         insertStm.setString(1, k.uniqueId.toString())
-        insertStm.execute()
-        return loadOnline(k)
+        insertStm.executeUpdate()
+        return loadOnlineFromDatabase(k)
     }
-
 
     fun join(k: Player): UserDataOnline? {
         val u = datum[k.uniqueId]
@@ -88,10 +85,7 @@ class UserDataManager: Manager<UUID, UserData>() {
     }
 
     fun quit(k: Player) {
-        val u = datum[k.uniqueId]
-        if (u != null) {
-            u.save()
-        }
+        datum[k.uniqueId]?.save()
         datum.remove(k.uniqueId)
     }
 
@@ -130,9 +124,10 @@ class UserDataManager: Manager<UUID, UserData>() {
         return user
     }
     private fun loadOnlineFromDatabase(k: Player): UserDataOnline? {
-        loadStm.setString(1, k.toString())
+        loadStm.setString(1, k.uniqueId.toString())
         val rs = loadStm.executeQuery()
-        if (!rs.next()) return null
+        if (!rs.next())
+            return null
 
         val user = UserDataOnline(
             k,

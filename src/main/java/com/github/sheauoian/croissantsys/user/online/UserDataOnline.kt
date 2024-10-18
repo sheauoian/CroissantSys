@@ -15,6 +15,7 @@ import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.TextColor
 import org.bukkit.attribute.Attribute
 import org.bukkit.entity.Player
+import java.util.*
 
 class UserDataOnline
     (val player: Player, override val money: Int, override val health: Double, override val maxHealth: Double):
@@ -23,13 +24,14 @@ class UserDataOnline
 {
     val eManager: EquipmentStorage = EquipmentStorage(this)
     private val cmStorage: CMaterialStorage = CMaterialStorage(this.uuid.toString())
+    private val fastTravel: FastTravel = FastTravel(this.uuid.toString())
 
     override fun save() {
         super.save()
         eManager.save()
         cmStorage.save()
+        fastTravel.save()
     }
-
 
     fun openMenu() {
         MainMenu(this).open()
@@ -70,9 +72,10 @@ class UserDataOnline
         player.sendActionBar(Component.text("$health / $maxHealth | ${money}\$"))
     }
 
-
     override fun getInflictDamage(d: Double): Double {
-        val damage = d * (baseStatus[StatusType.STR] ?: 1.0)
+        val isCritical = Random().nextDouble() <= (baseStatus[StatusType.CRITICAL_RATE] ?: 0.0)
+
+        val damage = d * (baseStatus[StatusType.STR] ?: 1.0) * (if(isCritical)100 else 1)
         player.sendMessage(Component.text(damage).color(TextColor.color(0xccaa88)))
         return damage
     }

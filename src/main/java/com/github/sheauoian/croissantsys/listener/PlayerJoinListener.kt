@@ -1,9 +1,7 @@
 package com.github.sheauoian.croissantsys.listener
 
 import com.github.sheauoian.croissantsys.CroissantSys
-import com.github.sheauoian.croissantsys.user.UserData
 import com.github.sheauoian.croissantsys.user.UserDataManager
-import com.github.sheauoian.croissantsys.user.online.UserDataOnline
 import net.kyori.adventure.key.Key
 import net.kyori.adventure.sound.Sound
 import net.kyori.adventure.text.minimessage.MiniMessage
